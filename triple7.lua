@@ -3,7 +3,7 @@ local repo = 'https://raw.githubusercontent.com/triple7distro/triple7/main/'
 local Library = loadstring(game:HttpGet(repo .. 'libraries/UI_library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'libraries/UI_theme.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'libraries/UI_save.lua'))()
-local EspLibrary = loadstring(game:HttpGet(repo .. 'libraries/ESP_library.lua'))()
+local EspLibrary = loadstring(game:HttpGet(repo .. 'libraries/ESP_library.lua'))()()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -605,8 +605,7 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
 -- esp
 local ESPGroup = Tabs.Visuals:AddLeftGroupbox('esp')
 
-local ESPSettings = EspLibrary.Settings.Enemy
-local ESPMainSettings = EspLibrary.MainSettings
+local ESPSettings = EspLibrary.Settings
 
 ESPGroup:AddToggle('ESPEnabled', {
     Text = 'enable esp',
@@ -631,7 +630,7 @@ ESPGroup:AddToggle('ESPBox', {
     Default = Color3.new(1, 1, 1),
     Title = 'box color',
     Callback = function(Value)
-        ESPSettings.BoxColor[1] = Value
+        ESPSettings.BoxColor = Value
     end
 })
 
@@ -645,7 +644,7 @@ ESPGroup:AddToggle('ESPBoxFill', {
     Default = Color3.new(1, 0, 0),
     Title = 'fill color',
     Callback = function(Value)
-        ESPSettings.BoxFillColor[1] = Value
+        ESPSettings.BoxFillColor = Value
     end
 })
 
@@ -655,30 +654,25 @@ ESPGroup:AddToggle('ESPBoxOutline', {
     Callback = function(Value)
         ESPSettings.BoxOutline = Value
     end
-})
-
-ESPGroup:AddSlider('ESPBoxTransparency', {
-    Text = 'box transparency',
-    Default = 0,
-    Min = 0,
-    Max = 1,
-    Rounding = 1,
+}):AddColorPicker('ESPBoxOutlineColor', {
+    Default = Color3.new(),
+    Title = 'outline color',
     Callback = function(Value)
-        ESPSettings.BoxColor[2] = 1 - Value
+        ESPSettings.BoxOutlineColor = Value
     end
 })
 
-ESPGroup:AddToggle('ESPRealName', {
+ESPGroup:AddToggle('ESPName', {
     Text = 'name',
     Default = false,
     Callback = function(Value)
-        ESPSettings.RealName = Value
+        ESPSettings.Name = Value
     end
-}):AddColorPicker('ESPRealNameColor', {
+}):AddColorPicker('ESPNameColor', {
     Default = Color3.new(1, 1, 1),
     Title = 'name color',
     Callback = function(Value)
-        ESPSettings.RealNameColor[1] = Value
+        ESPSettings.NameColor = Value
     end
 })
 
@@ -692,7 +686,7 @@ ESPGroup:AddToggle('ESPHealth', {
     Default = Color3.new(0, 1, 0),
     Title = 'health color',
     Callback = function(Value)
-        ESPSettings.HealthColor[1] = Value
+        ESPSettings.HealthColor = Value
     end
 })
 
@@ -706,7 +700,7 @@ ESPGroup:AddToggle('ESPDistance', {
     Default = Color3.new(1, 1, 1),
     Title = 'distance color',
     Callback = function(Value)
-        ESPSettings.DistanceColor[1] = Value
+        ESPSettings.DistanceColor = Value
     end
 })
 
@@ -720,7 +714,7 @@ ESPGroup:AddToggle('ESPWeapon', {
     Default = Color3.new(1, 1, 1),
     Title = 'weapon color',
     Callback = function(Value)
-        ESPSettings.WeaponColor[1] = Value
+        ESPSettings.WeaponColor = Value
     end
 })
 
@@ -734,7 +728,7 @@ ESPGroup:AddToggle('ESPSkeleton', {
     Default = Color3.new(1, 1, 1),
     Title = 'skeleton color',
     Callback = function(Value)
-        ESPSettings.SkeletonColor[1] = Value
+        ESPSettings.SkeletonColor = Value
     end
 })
 
@@ -748,13 +742,13 @@ ESPGroup:AddToggle('ESPChams', {
     Default = Color3.new(1, 1, 1),
     Title = 'chams fill',
     Callback = function(Value)
-        ESPSettings.ChamsFillColor[1] = Value
+        ESPSettings.ChamsFillColor = Value
     end
 }):AddColorPicker('ESPChamsOutlineColor', {
     Default = Color3.new(1, 1, 1),
     Title = 'chams outline',
     Callback = function(Value)
-        ESPSettings.ChamsOutlineColor[1] = Value
+        ESPSettings.ChamsOutlineColor = Value
     end
 })
 
@@ -770,7 +764,7 @@ ESPGroup:AddToggle('ESPTeamCheck', {
     Text = 'team check',
     Default = false,
     Callback = function(Value)
-        ESPMainSettings.TeamCheck = Value
+        ESPSettings.TeamCheck = Value
     end
 })
 
