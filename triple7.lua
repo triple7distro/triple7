@@ -4,11 +4,7 @@ local Library = loadstring(game:HttpGet(repo .. 'libraries/UI_library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'libraries/UI_theme.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'libraries/UI_save.lua'))()
 local EspLibraryCode = game:HttpGet(repo .. 'libraries/ESP_library.lua')
-local EspLibraryFunc, loadError = loadstring(EspLibraryCode)
-if not EspLibraryFunc then
-    error("Failed to load ESP library: " .. tostring(loadError))
-end
-local EspLibrary = EspLibraryFunc()
+local EspLibrary = loadstring(EspLibraryCode)()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -521,7 +517,185 @@ RunService.Heartbeat:Connect(function()
     SilentAim.is_visible = SilentAim.target_part and is_visible(SilentAim.target_part.Parent, SilentAim.target_part) or false
 end)
 
--- camera fov
+-- visuals - organized layout
+local ESPSettings = EspLibrary.Settings
+
+local ESPTabbox = Tabs.Visuals:AddLeftTabbox('esp')
+
+local ESPTab1 = ESPTabbox:AddTab('main')
+local ESPTab2 = ESPTabbox:AddTab('features')
+
+ESPTab1:AddToggle('ESPEnabled', {
+    Text = 'enable esp',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Enabled = Value
+        if Value then
+            EspLibrary.Load()
+        else
+            EspLibrary.Unload()
+        end
+    end
+})
+
+ESPTab1:AddSlider('ESPMaxDistance', {
+    Text = 'max distance',
+    Default = 1000,
+    Min = 100,
+    Max = 5000,
+    Rounding = 0,
+    Compact = true,
+    Callback = function(Value)
+        ESPSettings.MaxDistance = Value
+    end
+})
+
+ESPTab2:AddToggle('ESPBox', {
+    Text = 'box',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Box = Value
+    end
+}):AddColorPicker('ESPBoxColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'box color',
+    Callback = function(Value)
+        ESPSettings.BoxColor = Value
+    end
+})
+
+ESPTab2:AddToggle('ESPBoxFill', {
+    Text = 'box fill',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.BoxFill = Value
+    end
+}):AddColorPicker('ESPBoxFillColor', {
+    Default = Color3.new(1, 0, 0),
+    Title = 'fill color',
+    Callback = function(Value)
+        ESPSettings.BoxFillColor = Value
+    end
+})
+
+ESPTab2:AddToggle('ESPBoxOutline', {
+    Text = 'box outline',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.BoxOutline = Value
+    end
+}):AddColorPicker('ESPBoxOutlineColor', {
+    Default = Color3.new(),
+    Title = 'outline color',
+    Callback = function(Value)
+        ESPSettings.BoxOutlineColor = Value
+    end
+})
+
+ESPTab2:AddToggle('ESPName', {
+    Text = 'name',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Name = Value
+    end
+}):AddColorPicker('ESPNameColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'name color',
+    Callback = function(Value)
+        ESPSettings.NameColor = Value
+    end
+})
+
+ESPTab2:AddToggle('ESPHealth', {
+    Text = 'health',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Health = Value
+    end
+}):AddColorPicker('ESPHealthColor', {
+    Default = Color3.new(0, 1, 0),
+    Title = 'health color',
+    Callback = function(Value)
+        ESPSettings.HealthColor = Value
+    end
+})
+
+ESPTab2:AddToggle('ESPDistance', {
+    Text = 'distance text',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Distance = Value
+    end
+}):AddColorPicker('ESPDistanceColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'distance color',
+    Callback = function(Value)
+        ESPSettings.DistanceColor = Value
+    end
+})
+
+ESPTab2:AddToggle('ESPSkeleton', {
+    Text = 'skeleton',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Skeleton = Value
+    end
+}):AddColorPicker('ESPSkeletonColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'skeleton color',
+    Callback = function(Value)
+        ESPSettings.SkeletonColor = Value
+    end
+})
+
+-- chams (left middle)
+local ChamsGroup = Tabs.Visuals:AddLeftGroupbox('chams')
+
+ChamsGroup:AddToggle('ESPChams', {
+    Text = 'chams',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Chams = Value
+    end
+})
+
+ChamsGroup:AddToggle('ESPChamsFill', {
+    Text = 'chams fill',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.ChamsFill = Value
+    end
+}):AddColorPicker('ESPChamsFillColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'fill color',
+    Callback = function(Value)
+        ESPSettings.ChamsFillColor = Value
+    end
+})
+
+ChamsGroup:AddToggle('ESPChamsOutline', {
+    Text = 'chams outline',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.ChamsOutline = Value
+    end
+}):AddColorPicker('ESPChamsOutlineColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'outline color',
+    Callback = function(Value)
+        ESPSettings.ChamsOutlineColor = Value
+    end
+})
+
+ChamsGroup:AddToggle('ESPChamsVisibleOnly', {
+    Text = 'chams visible only',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.ChamsVisibleOnly = Value
+    end
+})
+
+-- camera (left bottom)
 local CameraGroup = Tabs.Visuals:AddLeftGroupbox('camera')
 
 local FOVEnabled = false
@@ -607,7 +781,15 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
     NoUI = false
 })
 
--- third person (simple lirp method - hold right click to rotate camera)
+CameraGroup:AddToggle('NoScreenEffects', {
+    Text = 'no screen effects',
+    Default = false,
+    Callback = function(Value)
+        NoScreenEffects = Value
+    end
+})
+
+-- third person
 local ThirdPerson = {
     enabled = false,
     distance = 10
@@ -638,13 +820,6 @@ CameraGroup:AddToggle('ThirdPerson', {
     end
 })
 
-CameraGroup:AddLabel('bind'):AddKeyPicker('ThirdPersonKeybind', {
-    Default = 'V',
-    Mode = 'Hold',
-    Text = 'third person hold',
-    NoUI = false
-})
-
 CameraGroup:AddSlider('ThirdPersonDistance', {
     Text = 'distance',
     Default = 10,
@@ -657,164 +832,11 @@ CameraGroup:AddSlider('ThirdPersonDistance', {
     end
 })
 
--- esp
-local ESPGroup = Tabs.Visuals:AddLeftGroupbox('esp')
-
-local ESPSettings = EspLibrary.Settings
-
-ESPGroup:AddToggle('ESPEnabled', {
-    Text = 'enable esp',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Enabled = Value
-        if Value then
-            EspLibrary.Load()
-        else
-            EspLibrary.Unload()
-        end
-    end
-})
-
-ESPGroup:AddToggle('ESPBox', {
-    Text = 'box',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Box = Value
-    end
-}):AddColorPicker('ESPBoxColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'box color',
-    Callback = function(Value)
-        ESPSettings.BoxColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPBoxFill', {
-    Text = 'box fill',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.BoxFill = Value
-    end
-}):AddColorPicker('ESPBoxFillColor', {
-    Default = Color3.new(1, 0, 0),
-    Title = 'fill color',
-    Callback = function(Value)
-        ESPSettings.BoxFillColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPBoxOutline', {
-    Text = 'box outline',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.BoxOutline = Value
-    end
-}):AddColorPicker('ESPBoxOutlineColor', {
-    Default = Color3.new(),
-    Title = 'outline color',
-    Callback = function(Value)
-        ESPSettings.BoxOutlineColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPName', {
-    Text = 'name',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Name = Value
-    end
-}):AddColorPicker('ESPNameColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'name color',
-    Callback = function(Value)
-        ESPSettings.NameColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPHealth', {
-    Text = 'health',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Health = Value
-    end
-}):AddColorPicker('ESPHealthColor', {
-    Default = Color3.new(0, 1, 0),
-    Title = 'health color',
-    Callback = function(Value)
-        ESPSettings.HealthColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPDistance', {
-    Text = 'distance',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Distance = Value
-    end
-}):AddColorPicker('ESPDistanceColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'distance color',
-    Callback = function(Value)
-        ESPSettings.DistanceColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPSkeleton', {
-    Text = 'skeleton',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Skeleton = Value
-    end
-}):AddColorPicker('ESPSkeletonColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'skeleton color',
-    Callback = function(Value)
-        ESPSettings.SkeletonColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPChams', {
-    Text = 'chams',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Chams = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPChamsFill', {
-    Text = 'chams fill',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.ChamsFill = Value
-    end
-}):AddColorPicker('ESPChamsFillColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'fill color',
-    Callback = function(Value)
-        ESPSettings.ChamsFillColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPChamsOutline', {
-    Text = 'chams outline',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.ChamsOutline = Value
-    end
-}):AddColorPicker('ESPChamsOutlineColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'outline color',
-    Callback = function(Value)
-        ESPSettings.ChamsOutlineColor = Value
-    end
-})
-
-ESPGroup:AddToggle('ESPChamsVisibleOnly', {
-    Text = 'chams visible only',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.ChamsVisibleOnly = Value
-    end
+CameraGroup:AddLabel('bind'):AddKeyPicker('ThirdPersonKeybind', {
+    Default = 'V',
+    Mode = 'Hold',
+    Text = 'third person hold',
+    NoUI = false
 })
 
 -- world effects
@@ -1031,19 +1053,6 @@ ViewmodelGroup:AddDropdown('ArmChamsMaterial', {
     end
 })
 
--- no screen effects
-local ScreenEffectsGroup = Tabs.Visuals:AddRightGroupbox('screen effects')
-
-local NoScreenEffects = false
-
-ScreenEffectsGroup:AddToggle('NoScreenEffects', {
-    Text = 'no screen effects',
-    Default = false,
-    Callback = function(Value)
-        NoScreenEffects = Value
-    end
-})
-
 local function applyViewmodelOffset(vm)
     if not vm then return end
     local hrp = FindFirstChild(vm, "HumanoidRootPart")
@@ -1110,7 +1119,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- inventory viewer
-local InventoryGroup = Tabs.Visuals:AddLeftGroupbox('inventory viewer')
+local InventoryGroup = Tabs.Visuals:AddRightGroupbox('inventory viewer')
 
 local InventoryViewer = {
     enabled = false,
