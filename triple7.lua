@@ -1,36 +1,33 @@
 local Library = loadstring(game:HttpGet(
-	"https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_library.lua"
+    "https://raw.githubusercontent.com/triple7distro/root/refs/heads/main/libraries/7569206C696272617279.lua"
 ))()
 
 local ThemeManager = loadstring(game:HttpGet(
-	"https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_theme.lua"
+    "https://raw.githubusercontent.com/triple7distro/root/refs/heads/main/libraries/7468656D65206D616E61676572.lua"
 ))()
 
 local SaveManager = loadstring(game:HttpGet(
-	"https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_save.lua"
+    "https://raw.githubusercontent.com/triple7distro/root/refs/heads/main/libraries/73617665206D616E61676572.lua"
 ))()
 
-local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
-local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local Camera = Workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 
 local CFrameNew = CFrame.new
 local Vector2New = Vector2.new
 local Vector3New = Vector3.new
-local MathFloor = math.floor
-
 local IsDescendantOf = game.IsDescendantOf
 local FindFirstChild = game.FindFirstChild
 local FindFirstChildOfClass = game.FindFirstChildOfClass
 local Raycast = Workspace.Raycast
 local WorldToViewportPoint = Camera.WorldToViewportPoint
+local MathFloor = math.floor
 
 local Window = Library:CreateWindow({
     Title = "triple7 project delta / 1.2.2 / 19.04.2026",
@@ -205,7 +202,7 @@ local function GetClosestTarget(useFov, fovSize, aimPart, targetNPC, friendlyLis
     local minDistance = useFov and fovSize or math.huge
     local mousePos = Vector2New(Mouse.X, Mouse.Y)
     local guiInset = game:GetService("GuiService"):GetGuiInset()
-
+    
     if targetNPC then
         for _, zone in pairs(Workspace.AiZones:GetChildren()) do
             for _, npc in pairs(zone:GetChildren()) do
@@ -291,24 +288,24 @@ local function MakeBeam(origin, position, color)
     return beam, part1, part2
 end
 
-local ReplicatedPlayers = ReplicatedStorage:WaitForChild("Players")
-local BulletModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("FPS"):WaitForChild("Bullet"))
+local ReplicatedPlayers = ReplicatedStorage.Players
+local BulletModule = require(ReplicatedStorage.Modules.FPS.Bullet)
 
 local function GetLocalWeapon()
     local player = ReplicatedPlayers:FindFirstChild(LocalPlayer.Name)
     if not player then return nil end
-
+    
     local status = player:FindFirstChild("Status")
     if not status then return nil end
-
+    
     local gameplayVars = status:FindFirstChild("GameplayVariables")
     if not gameplayVars then return nil end
-
+    
     local equippedTool = gameplayVars:FindFirstChild("EquippedTool")
     if equippedTool and equippedTool.Value then
         return equippedTool.Value
     end
-
+    
     return nil
 end
 
@@ -686,5 +683,5 @@ end)
 Library:Notify("triple7 loaded", 3)
 
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/fun/notification.lua"
+    "https://raw.githubusercontent.com/triple7distro/root/refs/heads/main/fun/pd.lua"
 ))()
