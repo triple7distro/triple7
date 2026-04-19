@@ -616,7 +616,9 @@ local ThirdPerson = {
 }
 
 local function updateThirdPerson()
-    if ThirdPerson.enabled and ThirdPerson.active then
+    if not ThirdPerson.enabled then return end
+    local isActive = Options.ThirdPersonKeybind and Options.ThirdPersonKeybind:GetState()
+    if isActive then
         -- Switch to third person
         if LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
             LocalPlayer.CameraMode = Enum.CameraMode.Classic
@@ -653,10 +655,7 @@ CameraGroup:AddLabel('third person bind'):AddKeyPicker('ThirdPersonKeybind', {
     Default = 'V',
     Mode = 'Hold',
     Text = 'third person (hold)',
-    NoUI = false,
-    Callback = function(Value)
-        ThirdPerson.active = Value
-    end
+    NoUI = false
 })
 
 CameraGroup:AddSlider('ThirdPersonDistance', {
