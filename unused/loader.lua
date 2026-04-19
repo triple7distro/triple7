@@ -1,3 +1,5 @@
+-- THIS IS UNUSED, DO NOT CHANGE ANYTHING NOR INCLUDE IT ANYWHERE
+
 local expectedHex = "747269706C65376C6F61646572"
 local url = "https://raw.githubusercontent.com/triple7distro/root/refs/heads/main/hex/6C6F61646572"
 
