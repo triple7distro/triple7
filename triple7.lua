@@ -607,54 +607,41 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
     NoUI = false
 })
 
--- third person (lirp style)
+-- third person (simple lirp method - hold right click to rotate camera)
 local ThirdPerson = {
     enabled = false,
-    active = false,
-    distance = 10,
-    connection = nil
+    distance = 10
 }
 
 local function updateThirdPerson()
     if not ThirdPerson.enabled then return end
     local isActive = Options.ThirdPersonKeybind and Options.ThirdPersonKeybind:GetState()
     if isActive then
-        -- Switch to third person
-        if LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
-            LocalPlayer.CameraMode = Enum.CameraMode.Classic
-        end
+        LocalPlayer.CameraMode = Enum.CameraMode.Classic
         LocalPlayer.CameraMaxZoomDistance = ThirdPerson.distance
         LocalPlayer.CameraMinZoomDistance = ThirdPerson.distance
-        LocalPlayer.DevComputerCameraMode = Enum.DevComputerCameraMode.CameraToggle
     else
-        -- Return to first person
-        if LocalPlayer.CameraMode == Enum.CameraMode.Classic then
-            LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
-        end
+        LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
     end
 end
 
 CameraGroup:AddToggle('ThirdPerson', {
-    Text = 'third person',
+    Text = 'third person (hold rclick to rotate)',
     Default = false,
     Callback = function(Value)
         ThirdPerson.enabled = Value
         if Value then
-            ThirdPerson.connection = RunService.RenderStepped:Connect(updateThirdPerson)
+            RunService.RenderStepped:Connect(updateThirdPerson)
         else
-            if ThirdPerson.connection then
-                ThirdPerson.connection:Disconnect()
-                ThirdPerson.connection = nil
-            end
             LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
         end
     end
 })
 
-CameraGroup:AddLabel('third person bind'):AddKeyPicker('ThirdPersonKeybind', {
+CameraGroup:AddLabel('bind'):AddKeyPicker('ThirdPersonKeybind', {
     Default = 'V',
     Mode = 'Hold',
-    Text = 'third person (hold)',
+    Text = 'third person hold',
     NoUI = false
 })
 
