@@ -4,8 +4,8 @@ local ThemeManager = {} do
 
 	ThemeManager.Library = nil
 	ThemeManager.BuiltInThemes = {
-		['Default'] 		= { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"0055ff","BackgroundColor":"141414","OutlineColor":"323232"}') },
-		['test'] 			= { 2, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1e1e1e","AccentColor":"7e48a3","BackgroundColor":"232323","OutlineColor":"141414"}') },
+		['Default'] 		= { 1, httpService:JSONDecode('{"MainColor":"333333","AccentColor":"ffffff","OutlineColor":"000000","BackgroundColor":"111111","FontColor":"ffffff"}') },
+		['oled'] 			= { 2, httpService:JSONDecode('{"MainColor":"000000","AccentColor":"ffffff","OutlineColor":"111111","BackgroundColor":"000000","FontColor":"ffffff"}') },
 	}
 
 	function ThemeManager:ApplyTheme(theme)
