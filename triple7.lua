@@ -729,15 +729,31 @@ ESPGroup:AddToggle('ESPChams', {
     Callback = function(Value)
         ESPSettings.Chams = Value
     end
+})
+
+ESPGroup:AddToggle('ESPChamsFill', {
+    Text = 'chams fill',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.ChamsFill = Value
+    end
 }):AddColorPicker('ESPChamsFillColor', {
     Default = Color3.new(1, 1, 1),
-    Title = 'chams fill',
+    Title = 'fill color',
     Callback = function(Value)
         ESPSettings.ChamsFillColor = Value
     end
+})
+
+ESPGroup:AddToggle('ESPChamsOutline', {
+    Text = 'chams outline',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.ChamsOutline = Value
+    end
 }):AddColorPicker('ESPChamsOutlineColor', {
     Default = Color3.new(1, 1, 1),
-    Title = 'chams outline',
+    Title = 'outline color',
     Callback = function(Value)
         ESPSettings.ChamsOutlineColor = Value
     end
@@ -751,16 +767,8 @@ ESPGroup:AddToggle('ESPChamsVisibleOnly', {
     end
 })
 
-ESPGroup:AddToggle('ESPTeamCheck', {
-    Text = 'team check',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.TeamCheck = Value
-    end
-})
-
 -- world effects
-local WorldGroup = Tabs.Visuals:AddLeftGroupbox('world')
+local WorldGroup = Tabs.Visuals:AddRightGroupbox('world')
 
 local Lighting = game:GetService("Lighting")
 local OldAmbient1 = Lighting.Ambient
@@ -1052,7 +1060,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- inventory viewer
-local InventoryGroup = Tabs.Visuals:AddRightGroupbox('inventory viewer')
+local InventoryGroup = Tabs.Visuals:AddLeftGroupbox('inventory viewer')
 
 local InventoryViewer = {
     enabled = false,

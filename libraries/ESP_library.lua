@@ -16,8 +16,9 @@ Esp.Settings = {
     Distance = false,
     Skeleton = false,
     Chams = false,
+    ChamsFill = false,
+    ChamsOutline = false,
     ChamsVisibleOnly = false,
-    TeamCheck = false,
     MaxDistance = 1000,
 
     BoxColor = Color3.new(1, 1, 1),
@@ -307,6 +308,8 @@ local function UpdatePlayerEsp(player, delta)
         objects.Chams.Adornee = character
         objects.Chams.FillColor = settings.ChamsFillColor
         objects.Chams.OutlineColor = settings.ChamsOutlineColor
+        objects.Chams.FillTransparency = settings.ChamsFill and 0.5 or 1
+        objects.Chams.OutlineTransparency = settings.ChamsOutline and 0 or 1
         objects.Chams.DepthMode = settings.ChamsVisibleOnly and Enum.HighlightDepthMode.Occluded or Enum.HighlightDepthMode.AlwaysOnTop
     else
         objects.Chams.Enabled = false
