@@ -14,7 +14,6 @@ Esp.Settings = {
     Name = false,
     Health = false,
     Distance = false,
-    Weapon = false,
     Skeleton = false,
     Chams = false,
     ChamsVisibleOnly = false,
@@ -27,7 +26,6 @@ Esp.Settings = {
     NameColor = Color3.new(1, 1, 1),
     HealthColor = Color3.new(0, 1, 0),
     DistanceColor = Color3.new(1, 1, 1),
-    WeaponColor = Color3.new(1, 1, 1),
     SkeletonColor = Color3.new(1, 1, 1),
     ChamsFillColor = Color3.new(1, 1, 1),
     ChamsOutlineColor = Color3.new(1, 1, 1),
@@ -43,22 +41,22 @@ local Container = Instance.new("Folder")
 Container.Name = "ESPHolder"
 Container.Parent = game:GetService("CoreGui")
 
--- skeleton parts
+-- skeleton parts (child -> parent)
 local SkeletonParts = {
     Head = "UpperTorso",
-    UpperTorso = "LowerTorso",
-    LowerTorso = "LeftUpperLeg",
-    LowerTorso = "RightUpperLeg",
-    LeftUpperLeg = "LeftLowerLeg",
-    LeftLowerLeg = "LeftFoot",
-    RightUpperLeg = "RightLowerLeg",
-    RightLowerLeg = "RightFoot",
-    UpperTorso = "LeftUpperArm",
-    LeftUpperArm = "LeftLowerArm",
-    LeftLowerArm = "LeftHand",
-    UpperTorso = "RightUpperArm",
-    RightUpperArm = "RightLowerArm",
-    RightLowerArm = "RightHand",
+    LowerTorso = "UpperTorso",
+    LeftUpperLeg = "LowerTorso",
+    LeftLowerLeg = "LeftUpperLeg",
+    LeftFoot = "LeftLowerLeg",
+    RightUpperLeg = "LowerTorso",
+    RightLowerLeg = "RightUpperLeg",
+    RightFoot = "RightLowerLeg",
+    LeftUpperArm = "UpperTorso",
+    LeftLowerArm = "LeftUpperArm",
+    LeftHand = "LeftLowerArm",
+    RightUpperArm = "UpperTorso",
+    RightLowerArm = "RightUpperArm",
+    RightHand = "RightLowerArm",
 }
 
 local function NewDrawing(type, props)
@@ -84,8 +82,7 @@ local function GetBoundingBox(character)
         end
     end
     if not min or not max then return nil end
-    local center = (min + max) * 0.5
-    return CFrame.new(center, center + Vector3.new(0, 0, 1)), max - min
+    return min, max
 end
 
 local function IsTeammate(player)
@@ -101,18 +98,6 @@ local function GetHealth(character)
     return 0, 100
 end
 
-local function GetWeapon(player)
-    local character = player.Character
-    if not character then return "None" end
-    for _, v in pairs(character:GetChildren()) do
-        if v:IsA("Model") and not v.Name:find("Holster") then
-            if v:FindFirstChild("FlashPart") or v:FindFirstChild("Barrel") then
-                return v.Name
-            end
-        end
-    end
-    return "None"
-end
 
 local function CreatePlayerEsp(player)
     if player == LocalPlayer then return end
@@ -125,7 +110,6 @@ local function CreatePlayerEsp(player)
         Name = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = true, Outline = true, Visible = false }),
         Health = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = false, Outline = true, Visible = false }),
         Distance = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = false, Outline = true, Visible = false }),
-        Weapon = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = true, Outline = true, Visible = false }),
         Chams = Instance.new("Highlight"),
     }
 
@@ -219,14 +203,37 @@ local function UpdatePlayerEsp(player, delta)
         return
     end
 
-    local cf, size = GetBoundingBox(character)
-    if not cf then return end
+    local min, max = GetBoundingBox(character)
+    if not min or not max then return end
 
-    local topLeft = WorldToScreen((cf * CFrame.new(size.X * 0.5, size.Y * 0.5, 0)).Position)
-    local bottomRight = WorldToScreen((cf * CFrame.new(-size.X * 0.5, -size.Y * 0.5, 0)).Position)
+    -- Get all 8 corners of the bounding box and project to screen
+    local corners = {
+        Vector3.new(min.X, min.Y, min.Z),
+        Vector3.new(min.X, min.Y, max.Z),
+        Vector3.new(min.X, max.Y, min.Z),
+        Vector3.new(min.X, max.Y, max.Z),
+        Vector3.new(max.X, min.Y, min.Z),
+        Vector3.new(max.X, min.Y, max.Z),
+        Vector3.new(max.X, max.Y, min.Z),
+        Vector3.new(max.X, max.Y, max.Z),
+    }
 
-    local boxPos = Vector2.new(math.min(topLeft.X, bottomRight.X), math.min(topLeft.Y, bottomRight.Y))
-    local boxSize = Vector2.new(math.abs(topLeft.X - bottomRight.X), math.abs(topLeft.Y - bottomRight.Y))
+    local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
+
+    for _, corner in ipairs(corners) do
+        local screenPos, onscreen = WorldToScreen(corner)
+        if onscreen then
+            minX = math.min(minX, screenPos.X)
+            minY = math.min(minY, screenPos.Y)
+            maxX = math.max(maxX, screenPos.X)
+            maxY = math.max(maxY, screenPos.Y)
+        end
+    end
+
+    if minX == math.huge then return end
+
+    local boxPos = Vector2.new(minX, minY)
+    local boxSize = Vector2.new(maxX - minX, maxY - minY)
 
     local distance = (Camera.CFrame.Position - head.Position).Magnitude
     if settings.MaxDistance > 0 and distance > settings.MaxDistance then
@@ -292,16 +299,6 @@ local function UpdatePlayerEsp(player, delta)
         objects.Distance.Color = settings.DistanceColor
     else
         objects.Distance.Visible = false
-    end
-
-    -- weapon
-    if settings.Weapon then
-        objects.Weapon.Visible = true
-        objects.Weapon.Text = GetWeapon(player)
-        objects.Weapon.Position = boxPos + Vector2.new(boxSize.X * 0.5, boxSize.Y + 2)
-        objects.Weapon.Color = settings.WeaponColor
-    else
-        objects.Weapon.Visible = false
     end
 
     -- chams

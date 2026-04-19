@@ -709,20 +709,6 @@ ESPGroup:AddToggle('ESPDistance', {
     end
 })
 
-ESPGroup:AddToggle('ESPWeapon', {
-    Text = 'weapon',
-    Default = false,
-    Callback = function(Value)
-        ESPSettings.Weapon = Value
-    end
-}):AddColorPicker('ESPWeaponColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'weapon color',
-    Callback = function(Value)
-        ESPSettings.WeaponColor = Value
-    end
-})
-
 ESPGroup:AddToggle('ESPSkeleton', {
     Text = 'skeleton',
     Default = false,
