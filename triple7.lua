@@ -1,9 +1,10 @@
 -- Triple7 UI Library Loader
 -- Main entry point for the library
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/triple7/main/library.lua"))()
-local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/triple7/main/thememanager.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/triple7/main/savemanager.lua"))()
+-- Load the library from GitHub
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/library.lua"))()
+local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/thememanager.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/savemanager.lua"))()
 
 -- Example Usage:
 --[[
