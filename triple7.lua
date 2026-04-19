@@ -595,6 +595,7 @@ CameraGroup:AddSlider('CameraZoomFOV', {
     Max = 120,
     Rounding = 0,
     Suffix = '°',
+    Callback = function(Value)
         ZoomFOV = Value
     end
 })
