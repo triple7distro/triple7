@@ -3,6 +3,7 @@ local repo = 'https://raw.githubusercontent.com/triple7distro/triple7/main/'
 local Library = loadstring(game:HttpGet(repo .. 'libraries/UI_library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'libraries/UI_theme.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'libraries/UI_save.lua'))()
+local EspLibrary = loadstring(game:HttpGet(repo .. 'libraries/ESP_library.lua'))()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -599,6 +600,178 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
     Mode = 'Hold',
     Text = 'camera zoom (hold)',
     NoUI = false
+})
+
+-- esp
+local ESPGroup = Tabs.Visuals:AddLeftGroupbox('esp')
+
+local ESPSettings = EspLibrary.Settings.Enemy
+local ESPMainSettings = EspLibrary.MainSettings
+
+ESPGroup:AddToggle('ESPEnabled', {
+    Text = 'enable esp',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Enabled = Value
+        if Value then
+            EspLibrary.Load()
+        else
+            EspLibrary.Unload()
+        end
+    end
+})
+
+ESPGroup:AddToggle('ESPBox', {
+    Text = 'box',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Box = Value
+    end
+}):AddColorPicker('ESPBoxColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'box color',
+    Callback = function(Value)
+        ESPSettings.BoxColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPBoxFill', {
+    Text = 'box fill',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.BoxFill = Value
+    end
+}):AddColorPicker('ESPBoxFillColor', {
+    Default = Color3.new(1, 0, 0),
+    Title = 'fill color',
+    Callback = function(Value)
+        ESPSettings.BoxFillColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPBoxOutline', {
+    Text = 'box outline',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.BoxOutline = Value
+    end
+})
+
+ESPGroup:AddSlider('ESPBoxTransparency', {
+    Text = 'box transparency',
+    Default = 0,
+    Min = 0,
+    Max = 1,
+    Rounding = 1,
+    Callback = function(Value)
+        ESPSettings.BoxColor[2] = 1 - Value
+    end
+})
+
+ESPGroup:AddToggle('ESPRealName', {
+    Text = 'name',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.RealName = Value
+    end
+}):AddColorPicker('ESPRealNameColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'name color',
+    Callback = function(Value)
+        ESPSettings.RealNameColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPHealth', {
+    Text = 'health',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Health = Value
+    end
+}):AddColorPicker('ESPHealthColor', {
+    Default = Color3.new(0, 1, 0),
+    Title = 'health color',
+    Callback = function(Value)
+        ESPSettings.HealthColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPDistance', {
+    Text = 'distance',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Distance = Value
+    end
+}):AddColorPicker('ESPDistanceColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'distance color',
+    Callback = function(Value)
+        ESPSettings.DistanceColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPWeapon', {
+    Text = 'weapon',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Weapon = Value
+    end
+}):AddColorPicker('ESPWeaponColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'weapon color',
+    Callback = function(Value)
+        ESPSettings.WeaponColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPSkeleton', {
+    Text = 'skeleton',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Skeleton = Value
+    end
+}):AddColorPicker('ESPSkeletonColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'skeleton color',
+    Callback = function(Value)
+        ESPSettings.SkeletonColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPChams', {
+    Text = 'chams',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.Chams = Value
+    end
+}):AddColorPicker('ESPChamsFillColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'chams fill',
+    Callback = function(Value)
+        ESPSettings.ChamsFillColor[1] = Value
+    end
+}):AddColorPicker('ESPChamsOutlineColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'chams outline',
+    Callback = function(Value)
+        ESPSettings.ChamsOutlineColor[1] = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPChamsVisibleOnly', {
+    Text = 'chams visible only',
+    Default = false,
+    Callback = function(Value)
+        ESPSettings.ChamsVisibleOnly = Value
+    end
+})
+
+ESPGroup:AddToggle('ESPTeamCheck', {
+    Text = 'team check',
+    Default = false,
+    Callback = function(Value)
+        ESPMainSettings.TeamCheck = Value
+    end
 })
 
 -- world effects

@@ -1,10 +1,10 @@
 return function(utility)
-    local esp_table = {}
-    local workspace = cloneref(game:GetService("Workspace"))
-    local rservice = cloneref(game:GetService("RunService"))
-    local plrs = cloneref(game:GetService("Players"))
-    local lplr = plrs.LocalPlayer
-    local container = Instance.new("Folder", game:GetService("CoreGui").RobloxGui)
+    local EspTable = {}
+    local Workspace = cloneref(game:GetService("Workspace"))
+    local RunService = cloneref(game:GetService("RunService"))
+    local Players = cloneref(game:GetService("Players"))
+    local LocalPlayer = Players.LocalPlayer
+    local Container = Instance.new("Folder", game:GetService("CoreGui").RobloxGui)
     if not utility then
         utility = {
             connections = {
@@ -28,20 +28,20 @@ return function(utility)
                 end
                 return obj
             end
-            local connection; connection = rservice.Heartbeat:Connect(function(delta)
+            local Connection; Connection = RunService.Heartbeat:Connect(function(delta)
                 for _, func in utility.connections.heartbeats do
                     func(delta)
                 end
             end)
-            local connection1; connection1 = rservice.RenderStepped:Connect(function(delta)
+            local Connection1; Connection1 = RunService.RenderStepped:Connect(function(delta)
                 for _, func in utility.connections.renderstepped do
                     func(delta)
                 end
             end)
         
             utility.unload = function()
-                connection:Disconnect()
-                connection1:Disconnect()
+                Connection:Disconnect()
+                Connection1:Disconnect()
                 for key, _ in utility.connections.heartbeats do
                     utility.connections.heartbeats[key] = nil
                 end
@@ -51,67 +51,67 @@ return function(utility)
             end
         end
     end
-    esp_table = {
-        __loaded = false,
-        main_settings = {
-            textSize = 15,
-            textFont = Drawing.Fonts.Monospace,
-            distancelimit = false,
-            maxdistance = 200,
-            useteamcolor = false,
-            teamcheck = false,
-            fadetime = 1
+    EspTable = {
+        Loaded = false,
+        MainSettings = {
+            TextSize = 15,
+            TextFont = Drawing.Fonts.Monospace,
+            DistanceLimit = false,
+            MaxDistance = 200,
+            UseTeamColor = false,
+            TeamCheck = false,
+            FadeTime = 1
         },
-        settings = {
-            enemy = {
-                enabled = false,
+        Settings = {
+            Enemy = {
+                Enabled = false,
 
-                box = false,
-                box_fill = false,
-                realname = false,
-                displayname = false,
-                health = false,
-                dist = false,
-                weapon = false,
-                skeleton = false,
+                Box = false,
+                BoxFill = false,
+                RealName = false,
+                DisplayName = false,
+                Health = false,
+                Distance = false,
+                Weapon = false,
+                Skeleton = false,
 
-                box_outline = false,
-                realname_outline = false,
-                displayname_outline = false,
-                health_outline = false,
-                dist_outline = false,
-                weapon_outline = false,
+                BoxOutline = false,
+                RealNameOutline = false,
+                DisplayNameOutline = false,
+                HealthOutline = false,
+                DistanceOutline = false,
+                WeaponOutline = false,
 
-                box_color = { Color3.new(1, 1, 1), 1 },
-                box_fill_color = { Color3.new(1, 0, 0), 0.5 },
-                realname_color = { Color3.new(1, 1, 1), 1 },
-                displayname_color = { Color3.new(1, 1, 1), 1 },
-                health_color = { Color3.new(1, 1, 1), 1 },
-                dist_color = { Color3.new(1, 1, 1), 1 },
-                weapon_color = { Color3.new(1, 1, 1), 1 },
-                skeleton_color = { Color3.new(1, 1, 1), 1 },
+                BoxColor = { Color3.new(1, 1, 1), 1 },
+                BoxFillColor = { Color3.new(1, 0, 0), 0.5 },
+                RealNameColor = { Color3.new(1, 1, 1), 1 },
+                DisplayNameColor = { Color3.new(1, 1, 1), 1 },
+                HealthColor = { Color3.new(1, 1, 1), 1 },
+                DistanceColor = { Color3.new(1, 1, 1), 1 },
+                WeaponColor = { Color3.new(1, 1, 1), 1 },
+                SkeletonColor = { Color3.new(1, 1, 1), 1 },
 
-                box_outline_color = { Color3.new(), 1 },
-                realname_outline_color = Color3.new(),
-                displayname_outline_color = Color3.new(),
-                health_outline_color = Color3.new(),
-                dist_outline_color = Color3.new(),
-                weapon_outline_color = Color3.new(),
+                BoxOutlineColor = { Color3.new(), 1 },
+                RealNameOutlineColor = Color3.new(),
+                DisplayNameOutlineColor = Color3.new(),
+                HealthOutlineColor = Color3.new(),
+                DistanceOutlineColor = Color3.new(),
+                WeaponOutlineColor = Color3.new(),
 
-                chams = false,
-                chams_visible_only = false,
-                chams_fill_color = { Color3.new(1, 1, 1), 0.5 },
-                chamsoutline_color = { Color3.new(1, 1, 1), 0 }
+                Chams = false,
+                ChamsVisibleOnly = false,
+                ChamsFillColor = { Color3.new(1, 1, 1), 0.5 },
+                ChamsOutlineColor = { Color3.new(1, 1, 1), 0 }
             }
         }
     }
-    local loaded_plrs = {}
-    -- (please update me) vars
-    local camera = workspace.CurrentCamera
-    local viewportsize = camera.ViewportSize
+    local LoadedPlayers = {}
+    -- vars that need updating
+    local Camera = Workspace.CurrentCamera
+    local ViewportSize = Camera.ViewportSize
 
     -- constants
-    local VERTICES = {
+    local Vertices = {
         Vector3.new(-1, -1, -1),
         Vector3.new(-1, 1, -1),
         Vector3.new(-1, 1, 1),
@@ -121,7 +121,7 @@ return function(utility)
         Vector3.new(1, 1, 1),
         Vector3.new(1, -1, 1)
     }
-    local skeleton_order = {
+    local SkeletonOrder = {
         ["LeftFoot"] = "LeftLowerLeg",
         ["LeftLowerLeg"] = "LeftUpperLeg",
         ["LeftUpperLeg"] = "LowerTorso",
@@ -142,7 +142,7 @@ return function(utility)
         ["UpperTorso"] = "Head"
     }
     -- game specific function
-    local function getcurrentweapon(character)
+    local function GetCurrentWeapon(character)
         --return "None"
         local gun = "None"
         for _, v in character:GetChildren() do
@@ -154,8 +154,8 @@ return function(utility)
         return gun
     end
     -- functions
-    local esp = {}
-    esp.create_obj = function(type, args)
+    local Esp = {}
+    Esp.CreateObj = function(type, args)
         local obj = Drawing.new(type)
         for i, v in args do
             obj[i] = v
@@ -165,10 +165,10 @@ return function(utility)
 
 
 
-    local function isBodyPart(name)
+    local function IsBodyPart(name)
         return name == "Head" or name:find("Torso") or name:find("Leg") or name:find("Arm")
     end
-    local function getBoundingBox(parts)
+    local function GetBoundingBox(parts)
         local min, max
         for i = 1, #parts do
             local part = parts[i]
@@ -183,18 +183,18 @@ return function(utility)
         return CFrame.new(center, front), max - min
     end
 
-    local function worldToScreen(world)
-        local screen, inBounds = camera.WorldToViewportPoint(camera, world)
+    local function WorldToScreen(world)
+        local screen, inBounds = Camera.WorldToViewportPoint(Camera, world)
         return Vector2.new(screen.X, screen.Y), inBounds, screen.Z
     end
 
-    local function calculateCorners(cframe, size)
-        local corners = table.create(#VERTICES)
-        for i = 1, #VERTICES do
-            corners[i] = worldToScreen((cframe + size * 0.5 * VERTICES[i]).Position)
+    local function CalculateCorners(cframe, size)
+        local corners = table.create(#Vertices)
+        for i = 1, #Vertices do
+            corners[i] = WorldToScreen((cframe + size * 0.5 * Vertices[i]).Position)
         end
 
-        local min = Vector2.zero.Min(camera.ViewportSize, unpack(corners))
+        local min = Vector2.zero.Min(Camera.ViewportSize, unpack(corners))
         local max = Vector2.zero.Max(Vector2.zero, unpack(corners))
         return {
             corners = corners,
@@ -205,282 +205,281 @@ return function(utility)
         }
     end
 
-    -- MAINN
+    -- main esp function
 
-    local function create_esp(player)
+    local function CreateEsp(player)
         if not player then return end
-        local settings = esp_table.settings.enemy
-        loaded_plrs[player] = {
-            obj = {
-                box_fill = esp.create_obj("Square", { Filled = true, Visible = false }),
-                box_outline = esp.create_obj("Square", { Filled = false, Thickness = 3, Visible = false, ZIndex = -1 }),
-                box = esp.create_obj("Square", { Filled = false, Thickness = 1, Visible = false }),
-                realname = esp.create_obj("Text", { Center = true, Visible = false }),
-                displayname = esp.create_obj("Text", { Center = true, Visible = false }),
-                health = esp.create_obj("Text", { Center = false, Visible = false }),
-                dist = esp.create_obj("Text", { Center = false, Visible = false }),
-                weapon = esp.create_obj("Text", { Center = true, Visible = false }),
+        local settings = EspTable.Settings.Enemy
+        LoadedPlayers[player] = {
+            Obj = {
+                BoxFill = Esp.CreateObj("Square", { Filled = true, Visible = false }),
+                BoxOutline = Esp.CreateObj("Square", { Filled = false, Thickness = 3, Visible = false, ZIndex = -1 }),
+                Box = Esp.CreateObj("Square", { Filled = false, Thickness = 1, Visible = false }),
+                RealName = Esp.CreateObj("Text", { Center = true, Visible = false }),
+                DisplayName = Esp.CreateObj("Text", { Center = true, Visible = false }),
+                Health = Esp.CreateObj("Text", { Center = false, Visible = false }),
+                Distance = Esp.CreateObj("Text", { Center = false, Visible = false }),
+                Weapon = Esp.CreateObj("Text", { Center = true, Visible = false }),
             },
-            esp = {
-                visible = false,
-                onscreen = false,
-                distance = 0,
-                alive = false,
-                current_gun = "",
-                health = 0,
-                max_health = 0,
-                corners = nil,
-                head = nil,
-                cache = {},
-                cache_children = 0,
-                character = nil
+            EspData = {
+                Visible = false,
+                OnScreen = false,
+                Distance = 0,
+                Alive = false,
+                CurrentGun = "",
+                Health = 0,
+                MaxHealth = 0,
+                Corners = nil,
+                Head = nil,
+                Cache = {},
+                CacheChildren = 0,
+                Character = nil
             },
-            chams_object = Instance.new("Highlight", container),
-            plr_instance = player
+            ChamsObject = Instance.new("Highlight", Container),
+            PlayerInstance = player
         }
-        for required, _ in next, skeleton_order do
-            loaded_plrs[player].obj["skeleton_" .. required] = esp.create_obj("Line", { Visible = false })
+        for required, _ in next, SkeletonOrder do
+            LoadedPlayers[player].Obj["skeleton_" .. required] = Esp.CreateObj("Line", { Visible = false })
         end
-        local plr = loaded_plrs[player]
-        plr.connection = utility.new_renderstepped(function(delta)
-            local plr = loaded_plrs[player]
+        local plr = LoadedPlayers[player]
+        plr.Connection = utility.new_renderstepped(function(delta)
+            local plr = LoadedPlayers[player]
             -- setup
-            camera = workspace.CurrentCamera
-            if not camera then return end
-            local obj = plr.obj
-            local esp = plr.esp
-            local main_settings = esp_table.main_settings
-            if settings.enabled and
-                (main_settings.teamcheck and lplr.Team ~= player.Team or not main_settings.teamcheck) and
+            Camera = Workspace.CurrentCamera
+            if not Camera then return end
+            local obj = plr.Obj
+            local espData = plr.EspData
+            local mainSettings = EspTable.MainSettings
+            if settings.Enabled and
+                (mainSettings.TeamCheck and LocalPlayer.Team ~= player.Team or not mainSettings.TeamCheck) and
                 (player.Character and player.Character:FindFirstChild("Head")) then
-                esp.character = player.Character
-                local humanoid = esp.character:FindFirstChildOfClass("Humanoid")
-                esp.head = esp.character:FindFirstChild("Head")
-                local _, onScreen = worldToScreen(esp.head.Position)
-                esp.onscreen = onScreen
-                if esp.onscreen then
-                    esp.distance = (camera.CFrame.p - esp.head.Position).Magnitude
-                    esp.health = humanoid and humanoid.Health or 0
-                    esp.max_health = humanoid and humanoid.MaxHealth or 1
-                    esp.alive = humanoid and humanoid.Health > 0 or false
+                espData.Character = player.Character
+                local humanoid = espData.Character:FindFirstChildOfClass("Humanoid")
+                espData.Head = espData.Character:FindFirstChild("Head")
+                local _, onScreen = WorldToScreen(espData.Head.Position)
+                espData.OnScreen = onScreen
+                if espData.OnScreen then
+                    espData.Distance = (Camera.CFrame.p - espData.Head.Position).Magnitude
+                    espData.Health = humanoid and humanoid.Health or 0
+                    espData.MaxHealth = humanoid and humanoid.MaxHealth or 1
+                    espData.Alive = humanoid and humanoid.Health > 0 or false
                     do
                         local cache = {}
-                        for i = 1, #esp.character:GetChildren() do
-                            local part = esp.character:GetChildren()[i]
-                            if part:IsA("BasePart") and isBodyPart(part.Name) then
+                        for i = 1, #espData.Character:GetChildren() do
+                            local part = espData.Character:GetChildren()[i]
+                            if part:IsA("BasePart") and IsBodyPart(part.Name) then
                                 cache[#cache + 1] = part
                             end
                         end
-                        esp.corners = calculateCorners(getBoundingBox(cache))
+                        espData.Corners = CalculateCorners(GetBoundingBox(cache))
                     end
-                    if esp.corners then
-                        local box = obj.box
-                        local box_outline = obj.box_outline
-                        local box_fill = obj.box_fill
-                        local health = obj.health
-                        local realname = obj.realname
-                        local displayname = obj.displayname
-                        local dist = obj.dist
-                        local weapon = obj.weapon
-                        local cham = plr.chams_object
-                        local corners = esp.corners
+                    if espData.Corners then
+                        local box = obj.Box
+                        local boxOutline = obj.BoxOutline
+                        local boxFill = obj.BoxFill
+                        local health = obj.Health
+                        local realname = obj.RealName
+                        local displayname = obj.DisplayName
+                        local dist = obj.Distance
+                        local weapon = obj.Weapon
+                        local cham = plr.ChamsObject
+                        local corners = espData.Corners
 
-                        cham.Enabled = settings.chams
+                        cham.Enabled = settings.Chams
                         if cham.Enabled then
-                            cham.DepthMode = settings.chams_visible_only and 1 or 0
-                            cham.Adornee = esp.character
-                            cham.FillColor = settings.chams_fill_color[1]
-                            cham.FillTransparency = settings.chams_fill_color[2]
-                            cham.OutlineColor = settings.chamsoutline_color[1]
-                            cham.OutlineTransparency = settings.chamsoutline_color[2]
+                            cham.DepthMode = settings.ChamsVisibleOnly and 1 or 0
+                            cham.Adornee = espData.Character
+                            cham.FillColor = settings.ChamsFillColor[1]
+                            cham.FillTransparency = settings.ChamsFillColor[2]
+                            cham.OutlineColor = settings.ChamsOutlineColor[1]
+                            cham.OutlineTransparency = settings.ChamsOutlineColor[2]
                         end
 
-                        box.Visible = settings.box
-                        box_outline.Visible = box.Visible and settings.box_outline
-                        box_fill.Visible = box.Visible and settings.box_fill
+                        box.Visible = settings.Box
+                        boxOutline.Visible = box.Visible and settings.BoxOutline
                         if box.Visible then
                             box.Position = corners.topLeft
                             box.Size = corners.bottomRight - corners.topLeft
-                            box.Color = settings.box_color[1]
+                            box.Color = settings.BoxColor[1]
 
 
-                            box_outline.Position = box.Position + Vector2.new(2, 2)
-                            box_outline.Size = box.Size - Vector2.new(2, 2)
-                            box_outline.Color = settings.box_outline_color[1]
+                            boxOutline.Position = box.Position + Vector2.new(2, 2)
+                            boxOutline.Size = box.Size - Vector2.new(2, 2)
+                            boxOutline.Color = settings.BoxOutlineColor[1]
 
-                            box_fill.Position = box.Position
-                            box_fill.Size = box.Size
-                            box_fill.Color = settings.box_fill_color[1]
+                            boxFill.Position = box.Position
+                            boxFill.Size = box.Size
+                            boxFill.Color = settings.BoxFillColor[1]
                         end
 
-                        realname.Visible = settings.realname
+                        realname.Visible = settings.RealName
                         if realname.Visible then
-                            realname.Size = main_settings.textSize
-                            realname.Font = main_settings.textFont
+                            realname.Size = mainSettings.TextSize
+                            realname.Font = mainSettings.TextFont
                             realname.Text = player.Name
-                            realname.Color = settings.realname_color[1]
+                            realname.Color = settings.RealNameColor[1]
 
-                            realname.Outline = settings.realname_outline
-                            realname.OutlineColor = settings.realname_outline_color
+                            realname.Outline = settings.RealNameOutline
+                            realname.OutlineColor = settings.RealNameOutlineColor
                             realname.Position = (corners.topLeft + corners.topRight) * 0.5 -
                                 Vector2.yAxis * realname.TextBounds.Y - Vector2.new(0, 2)
                         end
 
-                        displayname.Visible = settings.displayname and settings.realname and
+                        displayname.Visible = settings.DisplayName and settings.RealName and
                         not player.Name == player.DisplayName
                         if displayname.Visible then
-                            displayname.Size = main_settings.textSize
-                            displayname.Font = main_settings.textFont
+                            displayname.Size = mainSettings.TextSize
+                            displayname.Font = mainSettings.TextFont
                             displayname.Text = player.DisplayName
-                            displayname.Color = settings.displayname_color[1]
+                            displayname.Color = settings.DisplayNameColor[1]
 
-                            displayname.Outline = settings.displayname_outline
-                            displayname.OutlineColor = settings.displayname_outline_color
+                            displayname.Outline = settings.DisplayNameOutline
+                            displayname.OutlineColor = settings.DisplayNameOutlineColor
                             displayname.Position = (corners.topLeft + corners.topRight) * 0.5 -
                                 Vector2.yAxis * displayname.TextBounds.Y -
                                 (realname.Visible and Vector2.yAxis * realname.TextBounds.Y or Vector2.zero)
                         end
 
-                        dist.Visible = settings.dist
+                        dist.Visible = settings.Distance
                         if dist.Visible then
-                            dist.Size = main_settings.textSize
-                            dist.Font = main_settings.textFont
-                            dist.Text = math.round(esp.distance) .. "s"
-                            dist.Color = settings.dist_color[1]
+                            dist.Size = mainSettings.TextSize
+                            dist.Font = mainSettings.TextFont
+                            dist.Text = math.round(espData.Distance) .. "s"
+                            dist.Color = settings.DistanceColor[1]
 
-                            dist.Outline = settings.dist_outline
-                            dist.OutlineColor = settings.dist_outline_color
+                            dist.Outline = settings.DistanceOutline
+                            dist.OutlineColor = settings.DistanceOutlineColor
                             dist.Position = corners.topRight + Vector2.new(2, 0) -
                                 Vector2.yAxis * (dist.TextBounds.Y * 0.25)
                         end
 
-                        health.Visible = settings.health
+                        health.Visible = settings.Health
                         if health.Visible then
-                            health.Size = main_settings.textSize
-                            health.Font = main_settings.textFont
-                            health.Text = esp.health
-                            health.Color = settings.health_color[1]
+                            health.Size = mainSettings.TextSize
+                            health.Font = mainSettings.TextFont
+                            health.Text = espData.Health
+                            health.Color = settings.HealthColor[1]
 
-                            health.Outline = settings.health_outline
-                            health.OutlineColor = settings.health_outline_color
+                            health.Outline = settings.HealthOutline
+                            health.OutlineColor = settings.HealthOutlineColor
                             health.Position = corners.topLeft - Vector2.new(2, 0) -
                                 Vector2.yAxis * (health.TextBounds.Y * 0.25) - 
                                 Vector2.xAxis * health.TextBounds.X
                         end
 
-                        weapon.Visible = settings.weapon
+                        weapon.Visible = settings.Weapon
                         if weapon.Visible then
-                            weapon.Size = main_settings.textSize
-                            weapon.Font = main_settings.textFont
-                            weapon.Text = esp_table.get_gun(player)
-                            weapon.Color = settings.weapon_color[1]
+                            weapon.Size = mainSettings.TextSize
+                            weapon.Font = mainSettings.TextFont
+                            weapon.Text = EspTable.GetGun(player)
+                            weapon.Color = settings.WeaponColor[1]
 
-                            weapon.Outline = settings.weapon_outline
-                            weapon.OutlineColor = settings.weapon_outline_color
+                            weapon.Outline = settings.WeaponOutline
+                            weapon.OutlineColor = settings.WeaponOutlineColor
                             weapon.Position = (corners.bottomLeft + corners.bottomRight) * 0.5
                         end
                         task.spawn(function()
-                            if (settings.skeleton and esp.character) then
-                                for _, part in next, esp.character:GetChildren() do
-                                    if skeleton_order[part.Name] and esp.character[part.Name] then
-                                        local parent_part = skeleton_order[part.Name]
-                                        local part_position, _ = camera:WorldToViewportPoint(part.Position)
-                                        local parent_part_position, _ = camera:WorldToViewportPoint(
+                            if (settings.Skeleton and espData.Character) then
+                                for _, part in next, espData.Character:GetChildren() do
+                                    if SkeletonOrder[part.Name] and espData.Character[part.Name] then
+                                        local parentPart = SkeletonOrder[part.Name]
+                                        local partPosition, _ = Camera:WorldToViewportPoint(part.Position)
+                                        local parentPartPosition, _ = Camera:WorldToViewportPoint(
                                             (
-                                                esp.character[parent_part].CFrame
+                                                espData.Character[parentPart].CFrame
                                             ).Position
                                         )
-                                        obj["skeleton_" .. part.Name].From = Vector2.new(part_position.X, part_position
+                                        obj["skeleton_" .. part.Name].From = Vector2.new(partPosition.X, partPosition
                                         .Y)
-                                        obj["skeleton_" .. part.Name].To = Vector2.new(parent_part_position.X,
-                                            parent_part_position.Y)
-                                        obj["skeleton_" .. part.Name].Color = settings.skeleton_color[1]
-                                        obj["skeleton_" .. part.Name].Transparency = settings.skeleton_color[2]
+                                        obj["skeleton_" .. part.Name].To = Vector2.new(parentPartPosition.X,
+                                            parentPartPosition.Y)
+                                        obj["skeleton_" .. part.Name].Color = settings.SkeletonColor[1]
+                                        obj["skeleton_" .. part.Name].Transparency = settings.SkeletonColor[2]
                                         obj["skeleton_" .. part.Name].Visible = true
                                     end
                                 end
                             else
-                                for required, _ in next, skeleton_order do
+                                for required, _ in next, SkeletonOrder do
                                     if (obj["skeleton_" .. required]) then
-                                        obj["skeleton_" .. required].Visible = settings.skeleton
+                                        obj["skeleton_" .. required].Visible = settings.Skeleton
                                     end
                                 end
                             end
                         end)
-                        if not esp.alive then -- not alive womp womp
-                            local fadetime = main_settings.fadetime
+                        if not espData.Alive then -- not alive
+                            local fadeTime = mainSettings.FadeTime
                             for _, v in obj do
-                                v.Transparency = v.Transparency - (delta / fadetime)
+                                v.Transparency = v.Transparency - (delta / fadeTime)
                                 if v.Transparency <= 0 then
                                     v.Visible = false
                                 end
                             end
-                            cham.FillTransparency = cham.FillTransparency - (delta / fadetime)
-                            cham.OutlineTransparency = cham.OutlineTransparency - (delta / fadetime)
+                            cham.FillTransparency = cham.FillTransparency - (delta / fadeTime)
+                            cham.OutlineTransparency = cham.OutlineTransparency - (delta / fadeTime)
                             if cham.FillTransparency <= 0 or cham.OutlineTransparency <= 0 then
                                 cham.Enabled = false
                             end
                         else
-                            box.Transparency = settings.box_color[2]
-                            box_outline.Transparency = settings.box_outline_color[2]
-                            box_fill.Transparency = settings.box_fill_color[2]
-                            realname.Transparency = settings.realname_color[2]
-                            displayname.Transparency = settings.displayname_color[2]
-                            health.Transparency = settings.health_color[2]
-                            dist.Transparency = settings.dist_color[2]
-                            weapon.Transparency = settings.weapon_color[2]
+                            box.Transparency = settings.BoxColor[2]
+                            boxOutline.Transparency = settings.BoxOutlineColor[2]
+                            boxFill.Transparency = settings.BoxFillColor[2]
+                            realname.Transparency = settings.RealNameColor[2]
+                            displayname.Transparency = settings.DisplayNameColor[2]
+                            health.Transparency = settings.HealthColor[2]
+                            dist.Transparency = settings.DistanceColor[2]
+                            weapon.Transparency = settings.WeaponColor[2]
                         end
                     else -- disabled, no corners
                         for _, v in obj do v.Visible = false end
-                        plr.chams_object.Enabled = false
+                        plr.ChamsObject.Enabled = false
                     end
                 else -- not on screen
                     for _, v in obj do v.Visible = false end
-                    plr.chams_object.Enabled = false
+                    plr.ChamsObject.Enabled = false
                 end
             else -- not here
                 for _, v in obj do v.Visible = false end
-                plr.chams_object.Enabled = false
+                plr.ChamsObject.Enabled = false
             end
         end)
     end
-    local function destroy_esp(player)
-        if not loaded_plrs[player] then return end
-        loaded_plrs[player].connection:Disconnect()
-        table.foreach(loaded_plrs[player].obj, function(i, v)
+    local function DestroyEsp(player)
+        if not LoadedPlayers[player] then return end
+        LoadedPlayers[player].Connection:Disconnect()
+        table.foreach(LoadedPlayers[player].Obj, function(i, v)
             v:Remove()
         end)
-        loaded_plrs[player].chams_object:Destroy()
-        loaded_plrs[player] = nil
+        LoadedPlayers[player].ChamsObject:Destroy()
+        LoadedPlayers[player] = nil
     end
 
-    function esp_table.load()
-        assert(not esp_table.__loaded, "[ESP] already loaded");
+    function EspTable.Load()
+        assert(not EspTable.Loaded, "[ESP] already loaded");
 
-        for i, v in next, plrs:GetPlayers() do
-            task.spawn(function() if v ~= lplr then create_esp(v) end end)
+        for i, v in next, Players:GetPlayers() do
+            task.spawn(function() if v ~= LocalPlayer then CreateEsp(v) end end)
         end
 
-        esp_table.playerAdded = plrs.PlayerAdded:Connect(create_esp);
-        esp_table.playerRemoving = plrs.PlayerRemoving:Connect(destroy_esp);
-        esp_table.__loaded = true;
+        EspTable.PlayerAdded = Players.PlayerAdded:Connect(CreateEsp);
+        EspTable.PlayerRemoving = Players.PlayerRemoving:Connect(DestroyEsp);
+        EspTable.Loaded = true;
     end
 
-    function esp_table.unload()
-        assert(esp_table.__loaded, "[ESP] not loaded yet");
+    function EspTable.Unload()
+        assert(EspTable.Loaded, "[ESP] not loaded yet");
 
-        for i, v in next, plrs:GetPlayers() do
-            task.spawn(function() destroy_esp(v) end)
+        for i, v in next, Players:GetPlayers() do
+            task.spawn(function() DestroyEsp(v) end)
         end
 
-        esp_table.playerAdded:Disconnect();
-        esp_table.playerRemoving:Disconnect();
-        esp_table.__loaded = false;
+        EspTable.PlayerAdded:Disconnect();
+        EspTable.PlayerRemoving:Disconnect();
+        EspTable.Loaded = false;
     end
 
-    function esp_table.get_gun(player)
+    function EspTable.GetGun(player)
         return "unknown"
     end
 
-    return esp_table
+    return EspTable
 end
