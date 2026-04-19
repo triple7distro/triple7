@@ -1,0 +1,4 @@
+ui library raw: https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_library.lua
+theme manager raw: https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_theme.lua
+save manager raw: https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_save.lua
+notification raw: https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/fun/notification.lua
