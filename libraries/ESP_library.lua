@@ -1,13 +1,12 @@
-return function()
-    local Esp = {}
-    local Workspace = cloneref(game:GetService("Workspace"))
-    local RunService = cloneref(game:GetService("RunService"))
-    local Players = cloneref(game:GetService("Players"))
-    local LocalPlayer = Players.LocalPlayer
-    local Camera = Workspace.CurrentCamera
+local Esp = {}
+local Workspace = cloneref(game:GetService("Workspace"))
+local RunService = cloneref(game:GetService("RunService"))
+local Players = cloneref(game:GetService("Players"))
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
 
-    -- settings
-    Esp.Settings = {
+-- settings
+Esp.Settings = {
         Enabled = false,
         Box = false,
         BoxFill = false,
@@ -375,6 +374,6 @@ return function()
             RemovePlayerEsp(player)
         end
     end
-
-    return Esp
 end
+
+return Esp

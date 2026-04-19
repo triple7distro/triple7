@@ -3,7 +3,7 @@ local repo = 'https://raw.githubusercontent.com/triple7distro/triple7/main/'
 local Library = loadstring(game:HttpGet(repo .. 'libraries/UI_library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'libraries/UI_theme.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'libraries/UI_save.lua'))()
-local EspLibrary = loadstring(game:HttpGet(repo .. 'libraries/ESP_library.lua'))()()
+local EspLibrary = loadstring(game:HttpGet(repo .. 'libraries/ESP_library.lua'))()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
