@@ -595,7 +595,6 @@ CameraGroup:AddSlider('CameraZoomFOV', {
     Max = 120,
     Rounding = 0,
     Suffix = '°',
-    Callback = function(Value)
         ZoomFOV = Value
     end
 })
@@ -605,6 +604,88 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
     Mode = 'Hold',
     Text = 'camera zoom (hold)',
     NoUI = false
+})
+
+-- third person
+local ThirdPerson = {
+    enabled = false,
+    x = 5,
+    y = 2,
+    z = 10,
+    connection = nil
+}
+
+CameraGroup:AddToggle('ThirdPerson', {
+    Text = 'third person',
+    Default = false,
+    Callback = function(Value)
+        ThirdPerson.enabled = Value
+        if Value then
+            if not ThirdPerson.connection then
+                ThirdPerson.connection = RunService.RenderStepped:Connect(function()
+                    if not ThirdPerson.enabled then return end
+                    local cam = Workspace.CurrentCamera
+                    local character = LocalPlayer.Character
+                    if not cam or not character then return end
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    if not hrp then return end
+                    local offset = CFrame.new(ThirdPerson.x, ThirdPerson.y, ThirdPerson.z)
+                    cam.CameraType = Enum.CameraType.Scriptable
+                    cam.CFrame = hrp.CFrame * offset
+                end)
+            end
+        else
+            if ThirdPerson.connection then
+                ThirdPerson.connection:Disconnect()
+                ThirdPerson.connection = nil
+            end
+            local cam = Workspace.CurrentCamera
+            if cam then
+                cam.CameraType = Enum.CameraType.Custom
+            end
+        end
+    end
+}):AddKeyPicker('ThirdPersonKeybind', {
+    Default = 'V',
+    Mode = 'Toggle',
+    Text = 'third person toggle',
+    NoUI = false
+})
+
+CameraGroup:AddSlider('ThirdPersonX', {
+    Text = 'offset X',
+    Default = 5,
+    Min = -20,
+    Max = 20,
+    Rounding = 1,
+    Compact = true,
+    Callback = function(Value)
+        ThirdPerson.x = Value
+    end
+})
+
+CameraGroup:AddSlider('ThirdPersonY', {
+    Text = 'offset Y',
+    Default = 2,
+    Min = -20,
+    Max = 20,
+    Rounding = 1,
+    Compact = true,
+    Callback = function(Value)
+        ThirdPerson.y = Value
+    end
+})
+
+CameraGroup:AddSlider('ThirdPersonZ', {
+    Text = 'offset Z',
+    Default = 10,
+    Min = -20,
+    Max = 20,
+    Rounding = 1,
+    Compact = true,
+    Callback = function(Value)
+        ThirdPerson.z = Value
+    end
 })
 
 -- esp
