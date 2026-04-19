@@ -674,7 +674,18 @@ local function InventoryUpdate(name)
     local inv = FindFirstChild(updateon, "Inventory")
     if inv then
         for _, item in next, inv:GetChildren() do
-            InventoryAdd("    " .. item.Name, 13, invPos)
+            local amount = item:GetAttribute("Amount")
+            local itemText = amount and (item.Name .. " x" .. amount) or item.Name
+            InventoryAdd("    " .. itemText, 13, invPos)
+            -- check for nested inventory in clothing/armor
+            local nestedInv = FindFirstChild(item, "Inventory")
+            if nestedInv then
+                for _, nestedItem in next, nestedInv:GetChildren() do
+                    local nestedAmount = nestedItem:GetAttribute("Amount")
+                    local nestedText = nestedAmount and (nestedItem.Name .. " x" .. nestedAmount) or nestedItem.Name
+                    InventoryAdd("        " .. nestedText, 13, invPos)
+                end
+            end
         end
     end
 end
