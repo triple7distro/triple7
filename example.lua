@@ -1,17 +1,10 @@
 -- Triple7 UI Library Example Script
 -- This demonstrates all features of the library
 
--- Load the library (local version for testing)
-local Library = loadstring(readfile("c:\\triple7\\library.lua"))()
-local ThemeManager = loadstring(readfile("c:\\triple7\\thememanager.lua"))()
-local SaveManager = loadstring(readfile("c:\\triple7\\savemanager.lua"))()
-
--- For production use, use HttpGet instead:
---[[
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/triple7/main/library.lua"))()
-local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/triple7/main/thememanager.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/triple7/main/savemanager.lua"))()
-]]
+-- Load the library from GitHub
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/library.lua"))()
+local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/thememanager.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/savemanager.lua"))()
 
 -- Create the main window
 local Window = Library:CreateWindow({
