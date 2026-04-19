@@ -683,5 +683,5 @@ end)
 Library:Notify("triple7 loaded", 3)
 
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/fun/pd.lua"
+    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/fun/notification.lua"
 ))()
