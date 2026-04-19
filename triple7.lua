@@ -214,7 +214,7 @@ local function get_closest_target(usefov, fov_size, aimpart, npc, friendly_list)
     return best_part, best_isnpc
 end
 
-local function make_beam(Origin, Position, Color)
+local function make_tracer(Origin, Position, Color)
     local part1, part2 = Instance.new("Part", Workspace.NoCollision), Instance.new("Part", Workspace.NoCollision)
     part1.Position = Origin; part2.Position = Position
     part1.Transparency = 1; part2.Transparency = 1
@@ -223,25 +223,22 @@ local function make_beam(Origin, Position, Color)
     part1.Anchored = true; part2.Anchored = true
     local OriginAttachment = Instance.new("Attachment", part1)
     local PositionAttachment = Instance.new("Attachment", part2)
-    local Beam = Instance.new("Beam", Workspace.NoCollision)
-    Beam.Name = "Beam"
-    Beam.Color = ColorSequence.new{
+    local Tracer = Instance.new("Beam", Workspace.NoCollision)
+    Tracer.Name = "Tracer"
+    Tracer.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color),
         ColorSequenceKeypoint.new(1, Color)
     }
-    Beam.LightEmission = 1
-    Beam.LightInfluence = 1
-    Beam.TextureMode = Enum.TextureMode.Static
-    Beam.TextureSpeed = 0
-    Beam.Texture = "http://www.roblox.com/asset/?id=446111271"
-    Beam.Transparency = NumberSequence.new(0)
-    Beam.Attachment0 = OriginAttachment
-    Beam.Attachment1 = PositionAttachment
-    Beam.FaceCamera = true
-    Beam.Segments = 1
-    Beam.Width0 = 0.25
-    Beam.Width1 = 0.25
-    return Beam, part1, part2
+    Tracer.LightEmission = 1
+    Tracer.LightInfluence = 0
+    Tracer.Transparency = NumberSequence.new(0.5)
+    Tracer.Attachment0 = OriginAttachment
+    Tracer.Attachment1 = PositionAttachment
+    Tracer.FaceCamera = false
+    Tracer.Segments = 1
+    Tracer.Width0 = 0.15
+    Tracer.Width1 = 0.15
+    return Tracer, part1, part2
 end
 
 local ReplicatedPlayers = ReplicatedStorage.Players
@@ -300,14 +297,14 @@ task.spawn(function()
                             SilentAim.last_shot_time = now
                             
                             if SilentAim.tracer and SilentAim.target_part then
-                                local beam, p1, p2 = make_beam(args[aimpart_index].Position, SilentAim.target_part.Position, SilentAim.tracer_color)
-                                local fade = -1
+                                local tracer, p1, p2 = make_tracer(args[aimpart_index].Position, SilentAim.target_part.Position, SilentAim.tracer_color)
+                                local fade = 0.5
                                 local conn
                                 conn = RunService.RenderStepped:Connect(function(delta)
                                     fade = fade + delta
-                                    beam.Transparency = NumberSequence.new(math.clamp(fade, 0, 1))
+                                    tracer.Transparency = NumberSequence.new(math.clamp(fade, 0.5, 1))
                                     if fade >= 1 then
-                                        beam:Destroy()
+                                        tracer:Destroy()
                                         p1:Destroy()
                                         p2:Destroy()
                                         conn:Disconnect()
@@ -615,13 +612,13 @@ MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', {
 Library.ToggleKeybind = Options.MenuKeybind
 
 SaveManager:SetLibrary(Library)
-SaveManager:SetFolder('triple7pd')
+SaveManager:SetFolder('triple7')
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 SaveManager:BuildConfigSection(Tabs.Settings)
 
 ThemeManager:SetLibrary(Library)
-ThemeManager:SetFolder('triple7pd')
+ThemeManager:SetFolder('triple7')
 ThemeManager:ApplyToTab(Tabs.Settings)
 
 -- watermark
@@ -650,6 +647,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-Library:Notify('triple7 loaded', 3)
+Library:Notify('triple7 loaded', 10)
 
 loadstring(game:HttpGet(repo .. 'fun/notification.lua'))()
