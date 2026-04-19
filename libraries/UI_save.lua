@@ -1,5 +1,3 @@
--- this is a SaveManager
-
 local httpService = game:GetService('HttpService')
 
 local SaveManager = {} do
