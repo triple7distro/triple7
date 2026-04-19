@@ -601,6 +601,298 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
     NoUI = false
 })
 
+-- world effects
+local WorldGroup = Tabs.Visuals:AddLeftGroupbox('world')
+
+local Lighting = game:GetService("Lighting")
+local OldAmbient1 = Lighting.Ambient
+local OldAmbient2 = Lighting.OutdoorAmbient
+local OldTime = MathFloor(Lighting.ClockTime)
+
+local WorldEffects = {
+    time_enabled = false,
+    time = OldTime,
+    ambient_enabled = false,
+    ambient_color1 = Color3.new(1, 1, 1),
+    ambient_color2 = Color3.fromRGB(150, 150, 150),
+    no_fog = false,
+    no_grass = false,
+    no_shadows = false
+}
+
+WorldGroup:AddToggle('TimeChanger', {
+    Text = 'time changer',
+    Default = false,
+    Callback = function(Value)
+        WorldEffects.time_enabled = Value
+    end
+})
+
+WorldGroup:AddSlider('TimeValue', {
+    Text = 'time',
+    Default = OldTime,
+    Min = 0,
+    Max = 24,
+    Rounding = 1,
+    Callback = function(Value)
+        WorldEffects.time = Value
+    end
+})
+
+WorldGroup:AddToggle('Ambient', {
+    Text = 'ambient',
+    Default = false,
+    Callback = function(Value)
+        WorldEffects.ambient_enabled = Value
+        if not Value then
+            Lighting.Ambient = OldAmbient1
+            Lighting.OutdoorAmbient = OldAmbient2
+        end
+    end
+}):AddColorPicker('AmbientColor1', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'color 1',
+    Callback = function(Value)
+        WorldEffects.ambient_color1 = Value
+    end
+}):AddColorPicker('AmbientColor2', {
+    Default = Color3.fromRGB(150, 150, 150),
+    Title = 'color 2',
+    Callback = function(Value)
+        WorldEffects.ambient_color2 = Value
+    end
+})
+
+WorldGroup:AddToggle('NoFog', {
+    Text = 'no fog',
+    Default = false,
+    Callback = function(Value)
+        WorldEffects.no_fog = Value
+        if Value then
+            Lighting.FogStart = math.huge
+            Lighting.FogEnd = math.huge
+        else
+            Lighting.FogStart = 0
+            Lighting.FogEnd = 1000
+        end
+    end
+})
+
+WorldGroup:AddToggle('NoGrass', {
+    Text = 'no grass',
+    Default = false,
+    Callback = function(Value)
+        WorldEffects.no_grass = Value
+        local terrain = FindFirstChildOfClass(Workspace, "Terrain")
+        if terrain then
+            terrain.Decoration = not Value
+        end
+    end
+})
+
+WorldGroup:AddToggle('NoShadows', {
+    Text = 'no shadows',
+    Default = false,
+    Callback = function(Value)
+        WorldEffects.no_shadows = Value
+        Lighting.GlobalShadows = not Value
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if WorldEffects.time_enabled then
+        Lighting.ClockTime = WorldEffects.time
+    end
+    if WorldEffects.ambient_enabled then
+        Lighting.Ambient = WorldEffects.ambient_color1
+        Lighting.OutdoorAmbient = WorldEffects.ambient_color2
+    end
+    if WorldEffects.no_shadows then
+        Lighting.GlobalShadows = false
+    end
+    if WorldEffects.no_fog then
+        Lighting.FogStart = math.huge
+        Lighting.FogEnd = math.huge
+    end
+end)
+
+-- viewmodel
+local ViewmodelGroup = Tabs.Visuals:AddRightGroupbox('viewmodel')
+
+local Viewmodel = {
+    x = 0,
+    y = 0,
+    z = 0,
+    gun_chams = false,
+    gun_color = Color3.new(1, 1, 1),
+    gun_material = "SmoothPlastic",
+    arm_chams = false,
+    arm_color = Color3.new(1, 1, 1),
+    arm_material = "SmoothPlastic"
+}
+
+ViewmodelGroup:AddLabel('offset')
+
+ViewmodelGroup:AddSlider('ViewmodelX', {
+    Text = 'X',
+    Default = 0,
+    Min = -5,
+    Max = 5,
+    Rounding = 2,
+    Compact = true,
+    Callback = function(Value)
+        Viewmodel.x = Value
+    end
+})
+
+ViewmodelGroup:AddSlider('ViewmodelY', {
+    Text = 'Y',
+    Default = 0,
+    Min = -5,
+    Max = 5,
+    Rounding = 2,
+    Compact = true,
+    Callback = function(Value)
+        Viewmodel.y = Value
+    end
+})
+
+ViewmodelGroup:AddSlider('ViewmodelZ', {
+    Text = 'Z',
+    Default = 0,
+    Min = -5,
+    Max = 5,
+    Rounding = 2,
+    Compact = true,
+    Callback = function(Value)
+        Viewmodel.z = Value
+    end
+})
+
+ViewmodelGroup:AddToggle('GunChams', {
+    Text = 'gun chams',
+    Default = false,
+    Callback = function(Value)
+        Viewmodel.gun_chams = Value
+    end
+}):AddColorPicker('GunChamsColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'gun color',
+    Callback = function(Value)
+        Viewmodel.gun_color = Value
+    end
+})
+
+ViewmodelGroup:AddDropdown('GunChamsMaterial', {
+    Text = 'gun material',
+    Default = 'SmoothPlastic',
+    Values = { 'ForceField', 'Neon', 'SmoothPlastic', 'Glass' },
+    Callback = function(Value)
+        Viewmodel.gun_material = Value
+    end
+})
+
+ViewmodelGroup:AddToggle('ArmChams', {
+    Text = 'arm chams',
+    Default = false,
+    Callback = function(Value)
+        Viewmodel.arm_chams = Value
+    end
+}):AddColorPicker('ArmChamsColor', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'arm color',
+    Callback = function(Value)
+        Viewmodel.arm_color = Value
+    end
+})
+
+ViewmodelGroup:AddDropdown('ArmChamsMaterial', {
+    Text = 'arm material',
+    Default = 'SmoothPlastic',
+    Values = { 'ForceField', 'Neon', 'SmoothPlastic', 'Glass' },
+    Callback = function(Value)
+        Viewmodel.arm_material = Value
+    end
+})
+
+-- no screen effects
+local ScreenEffectsGroup = Tabs.Visuals:AddRightGroupbox('screen effects')
+
+local NoScreenEffects = false
+
+ScreenEffectsGroup:AddToggle('NoScreenEffects', {
+    Text = 'no screen effects',
+    Default = false,
+    Callback = function(Value)
+        NoScreenEffects = Value
+    end
+})
+
+local function applyViewmodelOffset(vm)
+    if not vm then return end
+    local hrp = FindFirstChild(vm, "HumanoidRootPart")
+    if not hrp then return end
+    local vec = Vector3New(Viewmodel.x, Viewmodel.y, Viewmodel.z)
+    local lua = FindFirstChild(hrp, "LeftUpperArm")
+    local rua = FindFirstChild(hrp, "RightUpperArm")
+    local ir = FindFirstChild(hrp, "ItemRoot")
+    local m6 = FindFirstChild(hrp, "Motor6D")
+    if lua then lua.C0 = lua.C0 + vec end
+    if rua then rua.C0 = rua.C0 + vec end
+    if ir then ir.C0 = ir.C0 + vec end
+    if m6 then m6.C0 = m6.C0 + vec end
+end
+
+local function applyViewmodelChams(vm)
+    if not vm then return end
+    local itemView = FindFirstChild(vm, "Item")
+    if itemView and Viewmodel.gun_chams then
+        for _, v in pairs(itemView:GetDescendants()) do
+            if v.ClassName == "MeshPart" or v.ClassName == "Part" then
+                v.Material = Enum.Material[Viewmodel.gun_material]
+                v.Color = Viewmodel.gun_color
+            end
+            local surface = FindFirstChildOfClass(v, "SurfaceAppearance")
+            if surface then surface:Destroy() end
+        end
+    end
+    if Viewmodel.arm_chams then
+        for _, vmItem in pairs(vm:GetChildren()) do
+            if vmItem.ClassName == "MeshPart" then
+                if vmItem.Name:find("Hand") or vmItem.Name:find("Arm") then
+                    vmItem.Material = Enum.Material[Viewmodel.arm_material]
+                    vmItem.Color = Viewmodel.arm_color
+                end
+            end
+            if vmItem.ClassName == "Model" then
+                local ll = FindFirstChild(vmItem, "LL")
+                local lh = FindFirstChild(vmItem, "LH")
+                if ll or lh then
+                    for _, shirtItem in pairs(vmItem:GetChildren()) do
+                        local surface = FindFirstChildOfClass(shirtItem, "SurfaceAppearance")
+                        if surface then surface:Destroy() end
+                        shirtItem.Material = Enum.Material[Viewmodel.arm_material]
+                        shirtItem.Color = Viewmodel.arm_color
+                    end
+                end
+            end
+        end
+    end
+end
+
+Camera.ChildAdded:Connect(applyViewmodelOffset)
+Camera.DescendantAdded:Connect(applyViewmodelChams)
+
+RunService.RenderStepped:Connect(function()
+    if NoScreenEffects then
+        local playergui = LocalPlayer.PlayerGui
+        local noinsetgui = playergui and FindFirstChild(playergui, "NoInsetGui")
+        local mainframe = noinsetgui and FindFirstChild(noinsetgui, "MainFrame")
+        local screeneffects = mainframe and FindFirstChild(mainframe, "ScreenEffects")
+        if screeneffects then screeneffects.Visible = false end
+    end
+end)
+
 -- inventory viewer
 local InventoryGroup = Tabs.Visuals:AddRightGroupbox('inventory viewer')
 
