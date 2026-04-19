@@ -601,6 +601,144 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
     NoUI = false
 })
 
+-- inventory viewer
+local InventoryGroup = Tabs.Visuals:AddRightGroupbox('inventory viewer')
+
+local InventoryViewer = {
+    enabled = false,
+    x = 200,
+    y = 200,
+    delay = 0.25,
+    objs = {}
+}
+
+local InvDrawObjects = {}
+
+local function InvDrawNew(type, props)
+    local obj = Drawing.new(type)
+    for i, v in pairs(props) do
+        obj[i] = v
+    end
+    InvDrawObjects[#InvDrawObjects + 1] = obj
+    return obj
+end
+
+local function InvDrawRemoveAll()
+    for i, v in pairs(InvDrawObjects) do
+        v:Remove()
+        table.remove(InvDrawObjects, i)
+    end
+end
+
+local function InvDrawChangeVis(value)
+    for _, v in pairs(InvDrawObjects) do
+        v.Visible = value
+    end
+end
+
+local function InventoryAdd(text, size, pos)
+    local textObj = InvDrawNew("Text", {
+        Text = text,
+        Size = size,
+        Font = Drawing.Fonts.Monospace,
+        Outline = true,
+        Center = false,
+        Position = pos + Vector2New(0, (size + 1) * #InventoryViewer.objs),
+        Transparency = 1,
+        Visible = true,
+        Color = Color3.new(1, 1, 1),
+        ZIndex = 1,
+    })
+    InventoryViewer.objs[#InventoryViewer.objs + 1] = textObj
+end
+
+local function InventoryRefresh()
+    for i, v in InventoryViewer.objs do
+        if v then v:Remove() end
+        InventoryViewer.objs[i] = nil
+    end
+end
+
+local function InventoryUpdate(name)
+    local rplayers = ReplicatedStorage.Players
+    local updateon
+    for _, rplayer in next, rplayers:GetChildren() do
+        if name == rplayer.Name then
+            updateon = rplayer
+        end
+    end
+    if not updateon then return InventoryRefresh() end
+    local invPos = Vector2New(InventoryViewer.x, InventoryViewer.y)
+    InventoryAdd("" .. updateon.Name .. " Inventory", 13, invPos)
+    InventoryAdd("[Inventory]", 13, invPos)
+    local inv = FindFirstChild(updateon, "Inventory")
+    if inv then
+        for _, item in next, inv:GetChildren() do
+            InventoryAdd("    " .. item.Name, 13, invPos)
+        end
+    end
+end
+
+InventoryGroup:AddToggle('InventoryViewer', {
+    Text = 'inventory viewer',
+    Default = false,
+    Callback = function(Value)
+        InventoryViewer.enabled = Value
+        if not Value then
+            InventoryRefresh()
+            InvDrawRemoveAll()
+        end
+    end
+})
+
+InventoryGroup:AddSlider('InventoryViewerX', {
+    Text = 'X',
+    Default = 200,
+    Min = 0,
+    Max = 700,
+    Rounding = 0,
+    Compact = true,
+    Callback = function(Value)
+        InventoryViewer.x = Value
+    end
+})
+
+InventoryGroup:AddSlider('InventoryViewerY', {
+    Text = 'Y',
+    Default = 200,
+    Min = 0,
+    Max = 700,
+    Rounding = 0,
+    Compact = true,
+    Callback = function(Value)
+        InventoryViewer.y = Value
+    end
+})
+
+InventoryGroup:AddSlider('InventoryViewerDelay', {
+    Text = 'delay',
+    Default = 0.25,
+    Min = 0,
+    Max = 1,
+    Rounding = 2,
+    Compact = true,
+    Callback = function(Value)
+        InventoryViewer.delay = Value
+    end
+})
+
+local InvFrameTimer = tick()
+RunService.RenderStepped:Connect(function()
+    if (tick() - InvFrameTimer) >= InventoryViewer.delay then
+        InvFrameTimer = tick()
+        InventoryRefresh()
+        if InventoryViewer.enabled and SilentAim.target_part then
+            local name = SilentAim.target_part.Parent.Name
+            InventoryUpdate(name)
+        end
+    end
+end)
+
 -- settings
 local MenuGroup = Tabs.Settings:AddLeftGroupbox('menu')
 
