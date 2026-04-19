@@ -1,13 +1,13 @@
 local Library = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/ui%20library.lua"
+    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_library.lua"
 ))()
 
 local ThemeManager = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/theme%20manager.lua"
+    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_theme.lua"
 ))()
 
 local SaveManager = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/save%20manager.lua"
+    "https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/libraries/UI_save.lua"
 ))()
 
 local RunService = game:GetService("RunService")
