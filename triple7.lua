@@ -607,19 +607,29 @@ CameraGroup:AddLabel('zoom bind'):AddKeyPicker('CameraZoomKeybind', {
     NoUI = false
 })
 
--- third person (lirp style - uses roblox built-in camera)
+-- third person (lirp style)
 local ThirdPerson = {
     enabled = false,
+    active = false,
     distance = 10,
     connection = nil
 }
 
 local function updateThirdPerson()
-    if not ThirdPerson.enabled then return end
-    -- Force third person by setting min/max zoom to same distance
-    LocalPlayer.CameraMaxZoomDistance = ThirdPerson.distance
-    LocalPlayer.CameraMinZoomDistance = ThirdPerson.distance
-    LocalPlayer.DevComputerCameraMode = Enum.DevComputerCameraMode.UserChoice
+    if ThirdPerson.enabled and ThirdPerson.active then
+        -- Switch to third person
+        if LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+            LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        end
+        LocalPlayer.CameraMaxZoomDistance = ThirdPerson.distance
+        LocalPlayer.CameraMinZoomDistance = ThirdPerson.distance
+        LocalPlayer.DevComputerCameraMode = Enum.DevComputerCameraMode.CameraToggle
+    else
+        -- Return to first person
+        if LocalPlayer.CameraMode == Enum.CameraMode.Classic then
+            LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+        end
+    end
 end
 
 CameraGroup:AddToggle('ThirdPerson', {
@@ -628,27 +638,25 @@ CameraGroup:AddToggle('ThirdPerson', {
     Callback = function(Value)
         ThirdPerson.enabled = Value
         if Value then
-            -- Switch to third person
-            LocalPlayer.CameraMode = Enum.CameraMode.Classic
-            updateThirdPerson()
-            -- Keep updating in case game tries to reset it
             ThirdPerson.connection = RunService.RenderStepped:Connect(updateThirdPerson)
         else
-            -- Return to first person
             if ThirdPerson.connection then
                 ThirdPerson.connection:Disconnect()
                 ThirdPerson.connection = nil
             end
             LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
-            LocalPlayer.CameraMaxZoomDistance = 0.5
-            LocalPlayer.CameraMinZoomDistance = 0.5
         end
     end
-}):AddKeyPicker('ThirdPersonKeybind', {
+})
+
+CameraGroup:AddKeyPicker('ThirdPersonKeybind', {
     Default = 'V',
-    Mode = 'Toggle',
-    Text = 'third person toggle',
-    NoUI = false
+    Mode = 'Hold',
+    Text = 'third person (hold)',
+    NoUI = false,
+    Callback = function(Value)
+        ThirdPerson.active = Value
+    end
 })
 
 CameraGroup:AddSlider('ThirdPersonDistance', {
@@ -660,9 +668,6 @@ CameraGroup:AddSlider('ThirdPersonDistance', {
     Compact = true,
     Callback = function(Value)
         ThirdPerson.distance = Value
-        if ThirdPerson.enabled then
-            updateThirdPerson()
-        end
     end
 })
 
