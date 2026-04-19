@@ -649,7 +649,7 @@ CameraGroup:AddToggle('ThirdPerson', {
     end
 })
 
-CameraGroup:AddKeyPicker('ThirdPersonKeybind', {
+CameraGroup:AddLabel('third person bind'):AddKeyPicker('ThirdPersonKeybind', {
     Default = 'V',
     Mode = 'Hold',
     Text = 'third person (hold)',
