@@ -36,6 +36,7 @@ local Window = Library:CreateWindow({
 local Tabs = {
     Combat = Window:AddTab('combat'),
     Visuals = Window:AddTab('visuals'),
+    Misc = Window:AddTab('misc'),
     Settings = Window:AddTab('settings'),
 }
 
@@ -406,8 +407,7 @@ SilentAimGroup:AddToggle('SilentAimTracer', {
     Default = false,
     Callback = function(Value)
         SilentAim.tracer = Value
-    end
-}):AddColorPicker('SilentAimTracerColor', {
+    end}):AddColorPicker('SilentAimTracerColor', {
     Default = Color3.new(1, 1, 1),
     Title = 'tracer color',
     Transparency = 0,
@@ -1263,6 +1263,80 @@ RunService.RenderStepped:Connect(function()
         if InventoryViewer.enabled and SilentAim.target_part then
             local name = SilentAim.target_part.Parent.Name
             InventoryUpdate(name)
+        end
+    end
+end)
+
+-- misc tab
+local FlyHackGroup = Tabs.Misc:AddLeftGroupbox('flyhack')
+
+local FlyHack = {
+    enabled = false,
+    speed = 10,
+    yspeed = 10
+}
+
+FlyHackGroup:AddToggle('FlyHackEnabled', {
+    Text = 'flyhack enabled',
+    Default = false,
+    Callback = function(Value)
+        FlyHack.enabled = Value
+    end
+}):AddKeyPicker('FlyHackBind', {
+    Default = 'None',
+    SyncToggleState = true,
+    Mode = 'Toggle',
+    Text = 'flyhack',
+    NoUI = false
+})
+
+FlyHackGroup:AddSlider('FlyHackSpeed', {
+    Text = 'speed',
+    Default = 10,
+    Min = 1,
+    Max = 50,
+    Rounding = 0,
+    Suffix = 'sps',
+    Compact = true,
+    Callback = function(Value)
+        FlyHack.speed = Value
+    end
+})
+
+FlyHackGroup:AddSlider('FlyHackYSpeed', {
+    Text = 'y speed',
+    Default = 10,
+    Min = 1,
+    Max = 50,
+    Rounding = 0,
+    Suffix = 'sps',
+    Compact = true,
+    Callback = function(Value)
+        FlyHack.yspeed = Value
+    end
+})
+
+local UserInputService = game:GetService("UserInputService")
+
+RunService.Heartbeat:Connect(function(delta)
+    local character = LocalPlayer.Character
+    local hrp = character and FindFirstChild(character, "HumanoidRootPart")
+    if FlyHack.enabled and hrp then
+        local camLook = Camera.CFrame.LookVector
+        camLook = Vector3New(camLook.X, 0, camLook.Z)
+        local direction = Vector3.zero
+        direction = UserInputService:IsKeyDown(Enum.KeyCode.W) and direction + camLook or direction
+        direction = UserInputService:IsKeyDown(Enum.KeyCode.S) and direction - camLook or direction
+        direction = UserInputService:IsKeyDown(Enum.KeyCode.D) and direction + Vector3New(-camLook.Z, 0, camLook.X) or direction
+        direction = UserInputService:IsKeyDown(Enum.KeyCode.A) and direction + Vector3New(camLook.Z, 0, -camLook.X) or direction
+        direction = UserInputService:IsKeyDown(Enum.KeyCode.Space) and direction + Vector3.yAxis or direction
+        direction = UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) and direction - Vector3.yAxis or direction
+        if direction ~= Vector3.zero then
+            direction = direction.Unit
+        end
+        hrp.CFrame = hrp.CFrame + Vector3New(1, 0, 1) * (direction * delta * FlyHack.speed) + Vector3.yAxis * (direction * delta * FlyHack.yspeed)
+        for _, part in character:GetDescendants() do
+            if part:IsA("BasePart") then part.AssemblyLinearVelocity = Vector3.zero end
         end
     end
 end)
