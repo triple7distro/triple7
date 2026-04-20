@@ -107,7 +107,7 @@ if ammoTypesFolder then
     end)
 end
 
--- silent aim
+-- silent aim v2 - based on infinity/swimhub approach
 local SilentAimGroup = Tabs.Combat:AddLeftGroupbox('silent aim')
 
 local SilentAim = {
@@ -120,89 +120,39 @@ local SilentAim = {
     fov_show = false,
     fov_color = Color3.new(1, 1, 1),
     fov_outline = false,
-    hit_chance = 85,
-    tracer = false,
-    tracer_color = Color3.new(1, 1, 1),
-    target_part = nil,
-    is_visible = false,
-    last_shot_time = 0,
-    shot_delay = 0.08,
-    friendly_list = {},
-    auto_shoot = false,
-    auto_shoot_delay = 0.1,
-    last_auto_shot = 0,
-    instant_hit = false
+    hit_chance = 100,
+    friendly_list = {}
 }
 
-local function updateFriendlyDropdown()
-    local playerNames = {}
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(playerNames, plr.Name)
-        end
+-- get remotes
+local ReplicatedPlayers = ReplicatedStorage:WaitForChild("Players")
+
+-- find remotes
+local RemotesFolder = ReplicatedStorage:WaitForChild("Remotes", 5)
+local FireProjectile = RemotesFolder:WaitForChild("FireProjectile", 5)
+local ProjectileInflict = RemotesFolder:WaitForChild("ProjectileInflict", 5)
+
+-- utility functions
+local function get_local_weapon()
+    local Player = ReplicatedPlayers:FindFirstChild(LocalPlayer.Name)
+    if Player and Player:FindFirstChild("Status") and Player.Status:FindFirstChild("GameplayVariables") and Player.Status.GameplayVariables:FindFirstChild("EquippedTool") and Player.Status.GameplayVariables.EquippedTool.Value then
+        return Player.Status.GameplayVariables.EquippedTool.Value
     end
-    table.sort(playerNames)
-    if Options.FriendlyPlayers then
-        Options.FriendlyPlayers:SetValues(playerNames)
-    end
+    return nil
 end
 
-local VisCheckParams = RaycastParams.new()
-VisCheckParams.FilterType = Enum.RaycastFilterType.Exclude
-VisCheckParams.CollisionGroup = "WeaponRay"
-VisCheckParams.IgnoreWater = true
-
-local function is_visible(target, target_part)
-    if not (target and target_part) then return false end
-    VisCheckParams.FilterDescendantsInstances = { Workspace.NoCollision, Camera, LocalPlayer.Character }
-    local origin = Camera.CFrame.Position
-    local castresults = Raycast(Workspace, origin, target_part.Position - origin, VisCheckParams)
-    return castresults and castresults.Instance and IsDescendantOf(castresults.Instance, target)
-end
-
-local function predict_velocity(Origin, Destination, DestinationVelocity, ProjectileSpeed)
-    local Distance = (Destination - Origin).Magnitude
-    if ProjectileSpeed <= 0 then return Destination end
-    local TimeToHit = Distance / ProjectileSpeed
-    local Predicted = Destination + DestinationVelocity * TimeToHit
-    local Delta = (Predicted - Origin).Magnitude / ProjectileSpeed
-    TimeToHit = TimeToHit + (Delta / ProjectileSpeed)
-    return Destination + DestinationVelocity * TimeToHit
-end
-
-local function make_tracer(Origin, Position, Color)
-    local part1, part2 = Instance.new("Part", Workspace.NoCollision), Instance.new("Part", Workspace.NoCollision)
-    part1.Position = Origin; part2.Position = Position
-    part1.Transparency = 1; part2.Transparency = 1
-    part1.CanCollide = false; part2.CanCollide = false
-    part1.Size = Vector3.zero; part2.Size = Vector3.zero
-    part1.Anchored = true; part2.Anchored = true
-    local OriginAttachment = Instance.new("Attachment", part1)
-    local PositionAttachment = Instance.new("Attachment", part2)
-    local Tracer = Instance.new("Beam", Workspace.NoCollision)
-    Tracer.Name = "Tracer"
-    Tracer.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color),
-        ColorSequenceKeypoint.new(1, Color)
-    }
-    Tracer.LightEmission = 1
-    Tracer.LightInfluence = 0
-    Tracer.Transparency = NumberSequence.new(0.5)
-    Tracer.Attachment0 = OriginAttachment
-    Tracer.Attachment1 = PositionAttachment
-    Tracer.FaceCamera = false
-    Tracer.Segments = 1
-    Tracer.Width0 = 0.15
-    Tracer.Width1 = 0.15
-    return Tracer, part1, part2
+local function is_holding_weapon()
+    local weapon = get_local_weapon()
+    return weapon ~= nil and weapon.Name ~= "Fists"
 end
 
 local function get_closest_target(usefov, fov_size, aimpart, npc, friendly_list)
-    local best_part, best_isnpc = nil, false
+    local best_part = nil
     local min_dist = usefov and fov_size or math.huge
     local mousepos = Vector2New(Mouse.X, Mouse.Y)
     local GuiInset = game:GetService("GuiService"):GetGuiInset()
     
+    -- check npcs
     if npc then
         for _, zone in pairs(Workspace.AiZones:GetChildren()) do
             for _, npcs in pairs(zone:GetChildren()) do
@@ -214,13 +164,13 @@ local function get_closest_target(usefov, fov_size, aimpart, npc, friendly_list)
                     if (not usefov or onscreen) and distance < min_dist then
                         best_part = part
                         min_dist = distance
-                        best_isnpc = true
                     end
                 end
             end
         end
     end
     
+    -- check players
     for _, plr in Players:GetPlayers() do
         if plr == LocalPlayer then continue end
         if friendly_list[plr.Name] then continue end
@@ -235,182 +185,93 @@ local function get_closest_target(usefov, fov_size, aimpart, npc, friendly_list)
                 if (not usefov or onscreen) and distance <= min_dist then
                     best_part = part
                     min_dist = distance
-                    best_isnpc = false
                 end
             end
         end
     end
     
-    return best_part, best_isnpc
+    return best_part
 end
 
-local ReplicatedPlayers = ReplicatedStorage.Players
-
-local function get_local_weapon()
-    local Player = ReplicatedPlayers:FindFirstChild(LocalPlayer.Name)
-    if Player and Player:FindFirstChild("Status") and Player.Status:FindFirstChild("GameplayVariables") and Player.Status.GameplayVariables:FindFirstChild("EquippedTool") and Player.Status.GameplayVariables.EquippedTool.Value then
-        return Player.Status.GameplayVariables.EquippedTool.Value
-    end
-    return nil
+-- prediction function (like swimhub)
+local function predict_velocity(Origin, Destination, DestinationVelocity, ProjectileSpeed)
+    local Distance = (Destination - Origin).Magnitude
+    if ProjectileSpeed <= 0 then return Destination end
+    local TimeToHit = Distance / ProjectileSpeed
+    local Predicted = Destination + DestinationVelocity * TimeToHit
+    local Delta = (Predicted - Origin).Magnitude / ProjectileSpeed
+    TimeToHit = TimeToHit + (Delta / ProjectileSpeed)
+    return Destination + DestinationVelocity * TimeToHit
 end
 
-local function is_holding_weapon()
-    local weapon = get_local_weapon()
-    return weapon ~= nil and weapon.Name ~= "Fists"
+-- visibility check
+local VisCheckParams = RaycastParams.new()
+VisCheckParams.FilterType = Enum.RaycastFilterType.Exclude
+VisCheckParams.CollisionGroup = "WeaponRay"
+VisCheckParams.IgnoreWater = true
+
+local function is_visible(target, target_part)
+    if not (target and target_part) then return false end
+    VisCheckParams.FilterDescendantsInstances = { Workspace.NoCollision, Camera, LocalPlayer.Character }
+    local origin = Camera.CFrame.Position
+    local castresults = Raycast(Workspace, origin, target_part.Position - origin, VisCheckParams)
+    return castresults and castresults.Instance and IsDescendantOf(castresults.Instance, target)
 end
 
--- instant hit packet system
-local FireProjectile = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("FireProjectile")
-local ProjectileInflict = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ProjectileInflict")
-
-local function instant_hit_packet(target_part)
-    if not target_part then return false end
-    
-    local rnd = math.random(-100000, 100000)
-    local now = tick()
-    
-    -- fire projectile with NaN (instant travel)
-    local success = FireProjectile:InvokeServer(
-        Vector3.new(0/0, 0/0, 0/0), -- NaN position = instant hit
-        rnd,
-        now
-    )
-    
-    if success then
-        -- inflict damage on target
-        ProjectileInflict:FireServer(
-            target_part,
-            target_part.CFrame:ToObjectSpace(CFrame.new(0, 0.0001, 0)),
-            rnd,
-            0/0
-        )
-        return true
-    end
-    return false
-end
-
--- bullet hook
-local GotHook = false
-local BulletModule = nil
-local CreateBulletFunc = nil
-
-task.spawn(function()
-    -- get bullet module reference like swimhub
-    local success, result = pcall(function()
-        return require(ReplicatedStorage.Modules.FPS.Bullet)
-    end)
-    if success and result then
-        BulletModule = result
-        CreateBulletFunc = result.CreateBullet
-    end
-    
-    repeat
-        for i, gc in next, getgc(true) do
-            if type(gc) == "table" then
-                if rawget(gc, "CreateBullet") and not GotHook then
-                    local old_bullet = gc.CreateBullet
-                    gc.CreateBullet = function(self, ...)
-                        local args = { ... }
-                        
-                        -- early exit if silent aim disabled or no target
-                        if not SilentAim.enabled then
-                            return old_bullet(self, unpack(args))
-                        end
-                        
-                        if not SilentAim.target_part then
-                            return old_bullet(self, unpack(args))
-                        end
-                        
-                        -- hit chance check
-                        if math.random(1, 100) > SilentAim.hit_chance then
-                            return old_bullet(self, unpack(args))
-                        end
-                        
-                        -- find ammo and aim part from args
-                        local loadedammo, aimpart_index
-                        for i, v in args do
-                            if typeof(v) == "Instance" and v.Name == "AimPart" then
-                                aimpart_index = i
-                            end
-                            if type(v) == "string" then
-                                local tmp = FindFirstChild(ReplicatedStorage.AmmoTypes, v)
-                                if tmp then loadedammo = tmp end
-                            end
-                        end
-                        
-                        if not (loadedammo and aimpart_index) then
-                            return old_bullet(self, unpack(args))
-                        end
-                        
-                        -- visibility check
-                        if SilentAim.visible_check and not SilentAim.is_visible then
-                            return old_bullet(self, unpack(args))
-                        end
-                        
-                        -- tracer
-                        if SilentAim.tracer then
-                            local tracer, p1, p2 = make_tracer(args[aimpart_index].Position, SilentAim.target_part.Position, SilentAim.tracer_color)
-                            local fade = 0.5
-                            local conn
-                            conn = RunService.RenderStepped:Connect(function(delta)
-                                fade = fade + delta
-                                tracer.Transparency = NumberSequence.new(math.clamp(fade, 0.5, 1))
-                                if fade >= 1 then
-                                    tracer:Destroy()
-                                    p1:Destroy()
-                                    p2:Destroy()
-                                    conn:Disconnect()
-                                end
-                            end)
-                        end
-                        
-                        -- prediction / instant hit
-                        if SilentAim.instant_hit then
-                            -- packet-based instant hit (true instant damage)
-                            instant_hit_packet(SilentAim.target_part)
-                            -- still create visual bullet but don't wait for it to hit
-                            args[aimpart_index] = { CFrame = CFrameNew(Camera.CFrame.Position, SilentAim.target_part.Position) }
-                            return old_bullet(self, unpack(args))
-                        else
-                            local Origin = Camera.CFrame.Position
-                            local Destination = SilentAim.target_part.Position
-                            local DestinationVelocity = SilentAim.target_part.Velocity
-                            local ProjectileSpeed = loadedammo:GetAttribute("MuzzleVelocity") or 300
-                            local PredictedPos = predict_velocity(Origin, Destination, DestinationVelocity, ProjectileSpeed)
-                            args[aimpart_index] = { CFrame = CFrameNew(Origin, PredictedPos) }
-                            return old_bullet(self, unpack(args))
-                        end
-                    end
-                    GotHook = true
-                    break
-                end
-            end
-        end
-        if not GotHook then task.wait(0.5) end
-    until GotHook
-end)
-
--- attribute hook
+-- core silent aim - using namecall hook (more reliable)
 local __namecall
 __namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local args = {...}
     local method = getnamecallmethod()
-    if not checkcaller() then
-        if method == "GetAttribute" and SilentAim.enabled then
-            local attr = args[1]
-            if attr == "ProjectileDrop" or attr == "Drag" then
-                return 0
+    
+    -- FireProjectile silent aim
+    if method == "InvokeServer" and self == FireProjectile and SilentAim.enabled then
+        local target = get_closest_target(SilentAim.fov_enabled, SilentAim.fov_size, SilentAim.part, SilentAim.target_ai, SilentAim.friendly_list)
+        if target then
+            -- visibility check
+            if SilentAim.visible_check and not is_visible(target.Parent, target) then
+                return __namecall(self, ...)
+            end
+            
+            -- hit chance
+            if math.random(1, 100) <= SilentAim.hit_chance then
+                -- get ammo info
+                local equipped = get_local_weapon()
+                local ammoType = equipped and equipped:FindFirstChild("AmmoType")
+                local ammo = ammoType and ammoType.Value and ReplicatedStorage.AmmoTypes:FindFirstChild(ammoType.Value)
+                local muzzleVel = ammo and ammo:GetAttribute("MuzzleVelocity") or 300
+                
+                -- predict
+                local Origin = Camera.CFrame.Position
+                local Destination = target.Position
+                local DestinationVelocity = target.Velocity
+                local PredictedPos = predict_velocity(Origin, Destination, DestinationVelocity, muzzleVel)
+                
+                -- modify position in args
+                args[1] = PredictedPos
+                return __namecall(self, unpack(args))
             end
         end
     end
+    
+    -- ProjectileInflict redirect
+    if method == "FireServer" and self == ProjectileInflict and SilentAim.enabled then
+        local target = get_closest_target(SilentAim.fov_enabled, SilentAim.fov_size, SilentAim.part, SilentAim.target_ai, SilentAim.friendly_list)
+        if target then
+            args[1] = target
+            args[2] = target.CFrame:ToObjectSpace(CFrame.new(0, 0.01, 0))
+            return __namecall(self, unpack(args))
+        end
+    end
+    
     return __namecall(self, ...)
 end)
 
--- silent aim tab
+-- ui
 SilentAimGroup:AddToggle('SilentAimEnabled', {
     Text = 'silent aim',
     Default = false,
-    Tooltip = 'detects apes and targets them',
+    Tooltip = 'redirects shots to target',
     Callback = function(Value)
         SilentAim.enabled = Value
     end
@@ -419,7 +280,7 @@ SilentAimGroup:AddToggle('SilentAimEnabled', {
 SilentAimGroup:AddToggle('SilentAimTargetAI', {
     Text = 'target ai',
     Default = false,
-    Tooltip = 'targets ai apes',
+    Tooltip = 'targets ai enemies',
     Callback = function(Value)
         SilentAim.target_ai = Value
     end
@@ -428,35 +289,9 @@ SilentAimGroup:AddToggle('SilentAimTargetAI', {
 SilentAimGroup:AddToggle('SilentAimVisibleCheck', {
     Text = 'visible only',
     Default = true,
-    Tooltip = 'only targets visible targets',
+    Tooltip = 'only targets visible enemies',
     Callback = function(Value)
         SilentAim.visible_check = Value
-    end
-})
-
-SilentAimGroup:AddToggle('SilentAimAutoShoot', {
-    Text = 'auto shoot',
-    Default = false,
-    Tooltip = 'automatically fires when target is acquired',
-    Callback = function(Value)
-        SilentAim.auto_shoot = Value
-    end}):AddKeyPicker('SilentAimAutoShootBind', {
-    Default = 'None',
-    Mode = 'Hold',
-    Text = 'auto shoot',
-    NoUI = false
-})
-
-SilentAimGroup:AddSlider('SilentAimAutoShootDelay', {
-    Text = 'auto shoot delay',
-    Default = 0.1,
-    Min = 0.05,
-    Max = 1,
-    Rounding = 2,
-    Suffix = 's',
-    Compact = true,
-    Callback = function(Value)
-        SilentAim.auto_shoot_delay = Value
     end
 })
 
@@ -472,37 +307,13 @@ SilentAimGroup:AddDropdown('SilentAimPart', {
 
 SilentAimGroup:AddSlider('SilentAimHitChance', {
     Text = 'hit chance',
-    Default = 85,
+    Default = 100,
     Min = 0,
     Max = 100,
     Rounding = 0,
     Suffix = '%',
     Callback = function(Value)
         SilentAim.hit_chance = Value
-    end
-})
-
-SilentAimGroup:AddToggle('SilentAimInstantHit', {
-    Text = 'instant hit',
-    Default = false,
-    Tooltip = 'bullets hit instantly (no travel time)',
-    Callback = function(Value)
-        SilentAim.instant_hit = Value
-    end
-})
-
-SilentAimGroup:AddToggle('SilentAimTracer', {
-    Text = 'bullet tracer',
-    Default = false,
-    Callback = function(Value)
-        SilentAim.tracer = Value
-    end
-}):AddColorPicker('SilentAimTracerColor', {
-    Default = Color3.new(1, 1, 1),
-    Title = 'tracer color',
-    Transparency = 0,
-    Callback = function(Value)
-        SilentAim.tracer_color = Value
     end
 })
 
@@ -566,6 +377,20 @@ SilentAimGroup:AddDropdown('FriendlyPlayers', {
     end
 })
 
+-- update friendly dropdown
+local function updateFriendlyDropdown()
+    local playerNames = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            table.insert(playerNames, plr.Name)
+        end
+    end
+    table.sort(playerNames)
+    if Options.FriendlyPlayers then
+        Options.FriendlyPlayers:SetValues(playerNames)
+    end
+end
+
 updateFriendlyDropdown()
 Players.PlayerAdded:Connect(updateFriendlyDropdown)
 Players.PlayerRemoving:Connect(function(plr)
@@ -575,7 +400,7 @@ Players.PlayerRemoving:Connect(function(plr)
     end
 end)
 
--- fov circle drawing
+-- fov circle
 local CircleOutline = Drawing.new("Circle")
 local CircleInline = Drawing.new("Circle")
 CircleInline.Transparency = 1
@@ -594,35 +419,6 @@ RunService.RenderStepped:Connect(function()
     CircleInline.Visible = SilentAim.fov_enabled and SilentAim.fov_show
     CircleOutline.Radius = SilentAim.fov_size
     CircleOutline.Visible = (SilentAim.fov_enabled and SilentAim.fov_show and SilentAim.fov_outline)
-end)
-
-RunService.Heartbeat:Connect(function()
-    SilentAim.target_part, SilentAim.is_npc = get_closest_target(
-        SilentAim.fov_enabled,
-        SilentAim.fov_size,
-        SilentAim.part,
-        SilentAim.target_ai,
-        SilentAim.friendly_list
-    )
-    SilentAim.is_visible = SilentAim.target_part and is_visible(SilentAim.target_part.Parent, SilentAim.target_part) or false
-
-    -- auto shoot (respects visible_check)
-    if SilentAim.enabled and SilentAim.auto_shoot and SilentAim.target_part and is_holding_weapon() then
-        local can_shoot = true
-        if SilentAim.visible_check and not SilentAim.is_visible then
-            can_shoot = false
-        end
-        if can_shoot then
-            local now = tick()
-            if now - SilentAim.last_auto_shot >= SilentAim.auto_shoot_delay then
-                SilentAim.last_auto_shot = now
-                local vim = game:GetService("VirtualInputManager")
-                vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                task.wait(0.01)
-                vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-            end
-        end
-    end
 end)
 
 -- visuals
