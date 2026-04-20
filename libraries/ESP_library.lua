@@ -273,7 +273,7 @@ local function UpdatePlayerEsp(player, delta)
 
     local boxCenterX = boxPos.X + boxSize.X / 2
 
-    -- name (top center, above box)
+    -- name
     if settings.Name then
         objects.Name.Visible = true
         objects.Name.Text = player.Name
@@ -283,7 +283,7 @@ local function UpdatePlayerEsp(player, delta)
         objects.Name.Visible = false
     end
 
-    -- health (left side of box)
+    -- health
     if settings.Health then
         local hp, maxhp = GetHealth(character)
         objects.Health.Visible = true
@@ -294,7 +294,7 @@ local function UpdatePlayerEsp(player, delta)
         objects.Health.Visible = false
     end
 
-    -- distance (bottom center, below box)
+    -- distance
     if settings.Distance then
         objects.Distance.Visible = true
         objects.Distance.Text = math.floor(distance) .. "m"
