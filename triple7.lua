@@ -26,7 +26,7 @@ local WorldToViewportPoint = Camera.WorldToViewportPoint
 local MathFloor = math.floor
 
 local Window = Library:CreateWindow({
-    Title = 'triple7 project delta / 1.2.3 / 19.04.2026',
+    Title = 'triple7 project delta / 1.3.0 / 20.04.2026',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -354,27 +354,29 @@ __namecall = hookmetamethod(game, "__namecall", function(self, ...)
     return __namecall(self, ...)
 end)
 
--- silent aim ui
+-- silent aim tab
 SilentAimGroup:AddToggle('SilentAimEnabled', {
     Text = 'silent aim',
     Default = false,
+    Tooltip = 'detects apes and targets them',
     Callback = function(Value)
         SilentAim.enabled = Value
     end
 })
 
 SilentAimGroup:AddToggle('SilentAimVisibleCheck', {
-    Text = 'visible check only',
+    Text = 'visible only',
     Default = true,
-    Tooltip = 'Only shoot visible targets (safer)',
+    Tooltip = 'only targets visible targets',
     Callback = function(Value)
         SilentAim.visible_check = Value
     end
 })
 
 SilentAimGroup:AddToggle('SilentAimTargetAI', {
-    Text = 'target AI',
+    Text = 'target ai',
     Default = false,
+    Tooltip = 'targets ai apes',
     Callback = function(Value)
         SilentAim.target_ai = Value
     end
@@ -391,7 +393,7 @@ SilentAimGroup:AddDropdown('SilentAimPart', {
 })
 
 SilentAimGroup:AddSlider('SilentAimHitChance', {
-    Text = 'hit chance %',
+    Text = 'hit chance',
     Default = 85,
     Min = 0,
     Max = 100,
@@ -470,7 +472,7 @@ SilentAimGroup:AddDropdown('FriendlyPlayers', {
     Default = {},
     Multi = true,
     AllowNull = true,
-    Tooltip = 'Select players to ignore',
+    Tooltip = 'select players to ignore',
     Callback = function(Value)
         SilentAim.friendly_list = Value or {}
     end
@@ -517,7 +519,7 @@ RunService.Heartbeat:Connect(function()
     SilentAim.is_visible = SilentAim.target_part and is_visible(SilentAim.target_part.Parent, SilentAim.target_part) or false
 end)
 
--- visuals - organized layout
+-- visuals
 local ESPSettings = EspLibrary.Settings
 
 local ESPTabbox = Tabs.Visuals:AddLeftTabbox('esp')
@@ -526,7 +528,7 @@ local ESPTab1 = ESPTabbox:AddTab('main')
 local ESPTab2 = ESPTabbox:AddTab('features')
 
 ESPTab1:AddToggle('ESPEnabled', {
-    Text = 'enable esp',
+    Text = 'esp masterswitch',
     Default = false,
     Callback = function(Value)
         ESPSettings.Enabled = Value
@@ -542,7 +544,7 @@ ESPTab1:AddSlider('ESPMaxDistance', {
     Text = 'max distance',
     Default = 1000,
     Min = 100,
-    Max = 5000,
+    Max = 50000,
     Rounding = 0,
     Compact = true,
     Callback = function(Value)
@@ -808,7 +810,7 @@ local function updateThirdPerson()
 end
 
 CameraGroup:AddToggle('ThirdPerson', {
-    Text = 'third person (hold rclick to rotate)',
+    Text = 'third person',
     Default = false,
     Callback = function(Value)
         ThirdPerson.enabled = Value
@@ -832,10 +834,10 @@ CameraGroup:AddSlider('ThirdPersonDistance', {
     end
 })
 
-CameraGroup:AddLabel('bind'):AddKeyPicker('ThirdPersonKeybind', {
+CameraGroup:AddLabel('third person bind'):AddKeyPicker('ThirdPersonKeybind', {
     Default = 'V',
     Mode = 'Hold',
-    Text = 'third person hold',
+    Text = 'third person bind',
     NoUI = false
 })
 
