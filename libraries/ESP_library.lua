@@ -273,54 +273,35 @@ local function UpdatePlayerEsp(player, delta)
 
     local boxCenterX = boxPos.X + boxSize.X / 2
 
-    -- set text content and visibility first
-    if settings.Health then
-        local hp, maxhp = GetHealth(character)
-        objects.Health.Text = tostring(hp)
-        objects.Health.Color = settings.HealthColor
-        objects.Health.Visible = true
-    else
-        objects.Health.Visible = false
-    end
-
+    -- name (top center, above box)
     if settings.Name then
-        objects.Name.Text = player.Name
-        objects.Name.Color = settings.NameColor
         objects.Name.Visible = true
+        objects.Name.Text = player.Name
+        objects.Name.Position = boxPos - Vector2.new(0, objects.Name.TextBounds.Y + 2)
+        objects.Name.Color = settings.NameColor
     else
         objects.Name.Visible = false
     end
 
-    if settings.Distance then
-        objects.Distance.Text = math.floor(distance) .. "m"
-        objects.Distance.Color = settings.DistanceColor
-        objects.Distance.Position = Vector2.new(boxCenterX, boxPos.Y + boxSize.Y + 2)
-        objects.Distance.Visible = true
+    -- health (left side of box)
+    if settings.Health then
+        local hp, maxhp = GetHealth(character)
+        objects.Health.Visible = true
+        objects.Health.Text = tostring(hp)
+        objects.Health.Position = boxPos - Vector2.new(objects.Health.TextBounds.X + 4, 0)
+        objects.Health.Color = settings.HealthColor
     else
-        objects.Distance.Visible = false
+        objects.Health.Visible = false
     end
 
-    -- calculate positions building upward from box
-    -- order from top to bottom: Health, Name, (box), Distance
-    local padding = 2
-
-    -- position Name directly above box
-    if settings.Name then
-        local nameHeight = objects.Name.TextBounds.Y
-        local nameY = boxPos.Y - nameHeight - padding
-        objects.Name.Position = Vector2.new(boxCenterX, nameY)
-
-        -- position Health above Name
-        if settings.Health then
-            local healthHeight = objects.Health.TextBounds.Y
-            local healthY = nameY - healthHeight - padding
-            objects.Health.Position = Vector2.new(boxCenterX, healthY)
-        end
-    elseif settings.Health then
-        -- only Health, position it directly above box
-        local healthHeight = objects.Health.TextBounds.Y
-        local healthY = boxPos.Y - healthHeight - padding
-        objects.Health.Position = Vector2.new(boxCenterX, healthY)
+    -- distance (bottom center, below box)
+    if settings.Distance then
+        objects.Distance.Visible = true
+        objects.Distance.Text = math.floor(distance) .. "m"
+        objects.Distance.Position = Vector2.new(boxCenterX, boxPos.Y + boxSize.Y + 2)
+        objects.Distance.Color = settings.DistanceColor
+    else
+        objects.Distance.Visible = false
     end
 
     -- chams
