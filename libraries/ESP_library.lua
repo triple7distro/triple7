@@ -109,8 +109,8 @@ local function CreatePlayerEsp(player)
         BoxOutline = NewDrawing("Square", { Thickness = 3, Filled = false, Visible = false }),
         BoxFill = NewDrawing("Square", { Thickness = 1, Filled = true, Visible = false }),
         Name = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = true, Outline = true, Visible = false }),
-        Health = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = false, Outline = true, Visible = false }),
-        Distance = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = false, Outline = true, Visible = false }),
+        Health = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = true, Outline = true, Visible = false }),
+        Distance = NewDrawing("Text", { Size = Esp.Settings.TextSize, Font = Esp.Settings.TextFont, Center = true, Outline = true, Visible = false }),
         Chams = Instance.new("Highlight"),
     }
 
@@ -271,32 +271,46 @@ local function UpdatePlayerEsp(player, delta)
         objects.BoxFill.Visible = false
     end
 
-    -- name
-    if settings.Name then
-        objects.Name.Visible = true
-        objects.Name.Text = player.Name
-        objects.Name.Position = boxPos - Vector2.new(0, objects.Name.TextBounds.Y + 2)
-        objects.Name.Color = settings.NameColor
-    else
-        objects.Name.Visible = false
-    end
+    local boxCenterX = boxPos.X + boxSize.X / 2
 
-    -- health
+    -- calculate stacked text heights above box
+    local nameHeight = settings.Name and objects.Name.TextBounds.Y or 0
+    local healthHeight = settings.Health and objects.Health.TextBounds.Y or 0
+    local topStackHeight = 0
+    if settings.Health then topStackHeight = topStackHeight + healthHeight + 2 end
+    if settings.Name then topStackHeight = topStackHeight + nameHeight + 2 end
+
+    -- health (top center, above name)
     if settings.Health then
         local hp, maxhp = GetHealth(character)
         objects.Health.Visible = true
         objects.Health.Text = tostring(hp)
-        objects.Health.Position = boxPos - Vector2.new(objects.Health.TextBounds.X + 4, 0)
+        local healthY = boxPos.Y - topStackHeight
+        objects.Health.Position = Vector2.new(boxCenterX, healthY)
         objects.Health.Color = settings.HealthColor
     else
         objects.Health.Visible = false
     end
 
-    -- distance
+    -- name (below health, above box)
+    if settings.Name then
+        objects.Name.Visible = true
+        objects.Name.Text = player.Name
+        local nameY = boxPos.Y - nameHeight - 2
+        if settings.Health then
+            nameY = boxPos.Y - objects.Health.TextBounds.Y - nameHeight - 4
+        end
+        objects.Name.Position = Vector2.new(boxCenterX, nameY)
+        objects.Name.Color = settings.NameColor
+    else
+        objects.Name.Visible = false
+    end
+
+    -- distance (bottom center)
     if settings.Distance then
         objects.Distance.Visible = true
         objects.Distance.Text = math.floor(distance) .. "m"
-        objects.Distance.Position = boxPos + Vector2.new(boxSize.X + 4, 0)
+        objects.Distance.Position = Vector2.new(boxCenterX, boxPos.Y + boxSize.Y + 2)
         objects.Distance.Color = settings.DistanceColor
     else
         objects.Distance.Visible = false

@@ -71,14 +71,9 @@ local function applyWeaponMods()
         end
 
         if Toggles.NoSpread and Toggles.NoSpread.Value then
-            ammoType:SetAttribute("ProjectileDrop", 0)
             ammoType:SetAttribute("AccuracyDeviation", 0)
         else
-            local origDrop = originalValues[name].ProjectileDrop
             local origAcc = originalValues[name].AccuracyDeviation
-            if origDrop ~= nil then
-                ammoType:SetAttribute("ProjectileDrop", origDrop)
-            end
             if origAcc ~= nil then
                 ammoType:SetAttribute("AccuracyDeviation", origAcc)
             end
@@ -98,7 +93,7 @@ WeaponModsGroup:AddToggle('NoRecoil', {
 WeaponModsGroup:AddToggle('NoSpread', {
     Text = 'no spread',
     Default = false,
-    Tooltip = 'sets AccuracyDeviation and ProjectileDrop to 0',
+    Tooltip = 'sets AccuracyDeviation to 0',
     Callback = function(Value)
         applyWeaponMods()
     end
