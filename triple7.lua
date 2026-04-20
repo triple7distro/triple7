@@ -537,7 +537,7 @@ ESPTab1:AddToggle('ESPEnabled', {
 
 ESPTab1:AddSlider('ESPMaxDistance', {
     Text = 'max distance',
-    Default = 1000,
+    Default = 10000,
     Min = 100,
     Max = 50000,
     Rounding = 0,
@@ -618,7 +618,7 @@ ESPTab2:AddToggle('ESPHealth', {
 })
 
 ESPTab2:AddToggle('ESPDistance', {
-    Text = 'distance text',
+    Text = 'distance',
     Default = false,
     Callback = function(Value)
         ESPSettings.Distance = Value
