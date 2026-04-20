@@ -129,10 +129,7 @@ local SilentAim = {
     friendly_list = {},
     auto_shoot = false,
     auto_shoot_delay = 0.1,
-    last_auto_shot = 0,
-    resolver = false,
-    resolver_history = {},
-    resolver_max_history = 6
+    last_auto_shot = 0
 }
 
 local function updateFriendlyDropdown()
@@ -169,47 +166,6 @@ local function predict_velocity(Origin, Destination, DestinationVelocity, Projec
     local Delta = (Predicted - Origin).Magnitude / ProjectileSpeed
     TimeToHit = TimeToHit + (Delta / ProjectileSpeed)
     return Destination + DestinationVelocity * TimeToHit
-end
-
--- resolver functions
-local function update_resolver_history(target_part)
-    if not target_part then return nil end
-    local id = tostring(target_part)
-    local now = tick()
-    if not SilentAim.resolver_history[id] then
-        SilentAim.resolver_history[id] = {}
-    end
-    local history = SilentAim.resolver_history[id]
-    table.insert(history, 1, { pos = target_part.Position, time = now })
-    if #history > SilentAim.resolver_max_history then
-        table.remove(history)
-    end
-    -- cleanup old entries
-    for i = #history, 1, -1 do
-        if now - history[i].time > 0.5 then
-            table.remove(history, i)
-        end
-    end
-    return history
-end
-
-local function get_resolver_velocity(target_part)
-    local history = SilentAim.resolver_history[tostring(target_part)]
-    if not history or #history < 2 then
-        return target_part and target_part.Velocity or Vector3.zero
-    end
-    -- calculate velocity from last 2 positions
-    local latest = history[1]
-    local previous = history[2]
-    local dt = latest.time - previous.time
-    if dt <= 0 then return target_part.Velocity end
-    local velocity = (latest.pos - previous.pos) / dt
-    -- clamp extreme values
-    local max_velocity = 500
-    if velocity.Magnitude > max_velocity then
-        velocity = velocity.Unit * max_velocity
-    end
-    return velocity
 end
 
 local function get_closest_target(usefov, fov_size, aimpart, npc, friendly_list)
@@ -336,12 +292,7 @@ task.spawn(function()
                             
                             local origin = Camera.CFrame.Position
                             local target_pos = SilentAim.target_part.Position
-                            local target_vel
-                            if SilentAim.resolver then
-                                target_vel = get_resolver_velocity(SilentAim.target_part)
-                            else
-                                target_vel = SilentAim.target_part.Velocity
-                            end
+                            local target_vel = SilentAim.target_part.Velocity
                             local muzzle_vel = loadedammo:GetAttribute("MuzzleVelocity") or 300
                             local predicted = predict_velocity(origin, target_pos, target_vel, muzzle_vel)
                             
@@ -397,20 +348,7 @@ SilentAimGroup:AddToggle('SilentAimVisibleCheck', {
     Text = 'visible only',
     Default = true,
     Tooltip = 'only targets visible targets',
-    Callback = function(Value)
         SilentAim.visible_check = Value
-    end
-})
-
-SilentAimGroup:AddToggle('SilentAimResolver', {
-    Text = 'resolver',
-    Default = false,
-    Tooltip = 'fixes velocity desync by tracking position history',
-    Callback = function(Value)
-        SilentAim.resolver = Value
-        if not Value then
-            SilentAim.resolver_history = {}
-        end
     end
 })
 
@@ -576,11 +514,6 @@ RunService.Heartbeat:Connect(function()
         SilentAim.friendly_list
     )
     SilentAim.is_visible = SilentAim.target_part and is_visible(SilentAim.target_part.Parent, SilentAim.target_part) or false
-
-    -- update resolver history
-    if SilentAim.resolver and SilentAim.target_part then
-        update_resolver_history(SilentAim.target_part)
-    end
 
     -- auto shoot (respects visible_check)
     if SilentAim.enabled and SilentAim.auto_shoot and SilentAim.target_part and is_holding_weapon() then
