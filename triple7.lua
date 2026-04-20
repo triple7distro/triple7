@@ -126,7 +126,10 @@ local SilentAim = {
     is_visible = false,
     last_shot_time = 0,
     shot_delay = 0.08,
-    friendly_list = {}
+    friendly_list = {},
+    auto_shoot = false,
+    auto_shoot_delay = 0.1,
+    last_auto_shot = 0
 }
 
 local function updateFriendlyDropdown()
@@ -359,6 +362,15 @@ SilentAimGroup:AddToggle('SilentAimEnabled', {
     end
 })
 
+SilentAimGroup:AddToggle('SilentAimTargetAI', {
+    Text = 'target ai',
+    Default = false,
+    Tooltip = 'targets ai apes',
+    Callback = function(Value)
+        SilentAim.target_ai = Value
+    end
+})
+
 SilentAimGroup:AddToggle('SilentAimVisibleCheck', {
     Text = 'visible only',
     Default = true,
@@ -368,12 +380,31 @@ SilentAimGroup:AddToggle('SilentAimVisibleCheck', {
     end
 })
 
-SilentAimGroup:AddToggle('SilentAimTargetAI', {
-    Text = 'target ai',
+SilentAimGroup:AddToggle('SilentAimAutoShoot', {
+    Text = 'auto shoot',
     Default = false,
-    Tooltip = 'targets ai apes',
+    Tooltip = 'automatically fires when target is acquired',
     Callback = function(Value)
-        SilentAim.target_ai = Value
+        SilentAim.auto_shoot = Value
+    end
+}):AddKeyPicker('SilentAimAutoShootBind', {
+    Default = 'None',
+    SyncToggleState = true,
+    Mode = 'Hold',
+    Text = 'auto shoot',
+    NoUI = false
+})
+
+SilentAimGroup:AddSlider('SilentAimAutoShootDelay', {
+    Text = 'auto shoot delay',
+    Default = 0.1,
+    Min = 0.05,
+    Max = 1,
+    Rounding = 2,
+    Suffix = 's',
+    Compact = true,
+    Callback = function(Value)
+        SilentAim.auto_shoot_delay = Value
     end
 })
 
@@ -512,6 +543,24 @@ RunService.Heartbeat:Connect(function()
         SilentAim.friendly_list
     )
     SilentAim.is_visible = SilentAim.target_part and is_visible(SilentAim.target_part.Parent, SilentAim.target_part) or false
+
+    -- auto shoot (respects visible_check)
+    if SilentAim.enabled and SilentAim.auto_shoot and SilentAim.target_part and is_holding_weapon() then
+        local can_shoot = true
+        if SilentAim.visible_check and not SilentAim.is_visible then
+            can_shoot = false
+        end
+        if can_shoot then
+            local now = tick()
+            if now - SilentAim.last_auto_shot >= SilentAim.auto_shoot_delay then
+                SilentAim.last_auto_shot = now
+                local vim = game:GetService("VirtualInputManager")
+                vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                task.wait(0.01)
+                vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+            end
+        end
+    end
 end)
 
 -- visuals
