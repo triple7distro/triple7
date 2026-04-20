@@ -1,3 +1,4 @@
+print("test print")
 local repo = 'https://raw.githubusercontent.com/triple7distro/triple7/main/'
 
 local Library = loadstring(game:HttpGet(repo .. 'libraries/UI_library.lua'))()
@@ -129,7 +130,8 @@ local SilentAim = {
     friendly_list = {},
     auto_shoot = false,
     auto_shoot_delay = 0.1,
-    last_auto_shot = 0
+    last_auto_shot = 0,
+    instant_hit = false
 }
 
 local function updateFriendlyDropdown()
@@ -166,6 +168,33 @@ local function predict_velocity(Origin, Destination, DestinationVelocity, Projec
     local Delta = (Predicted - Origin).Magnitude / ProjectileSpeed
     TimeToHit = TimeToHit + (Delta / ProjectileSpeed)
     return Destination + DestinationVelocity * TimeToHit
+end
+
+local function make_tracer(Origin, Position, Color)
+    local part1, part2 = Instance.new("Part", Workspace.NoCollision), Instance.new("Part", Workspace.NoCollision)
+    part1.Position = Origin; part2.Position = Position
+    part1.Transparency = 1; part2.Transparency = 1
+    part1.CanCollide = false; part2.CanCollide = false
+    part1.Size = Vector3.zero; part2.Size = Vector3.zero
+    part1.Anchored = true; part2.Anchored = true
+    local OriginAttachment = Instance.new("Attachment", part1)
+    local PositionAttachment = Instance.new("Attachment", part2)
+    local Tracer = Instance.new("Beam", Workspace.NoCollision)
+    Tracer.Name = "Tracer"
+    Tracer.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color),
+        ColorSequenceKeypoint.new(1, Color)
+    }
+    Tracer.LightEmission = 1
+    Tracer.LightInfluence = 0
+    Tracer.Transparency = NumberSequence.new(0.5)
+    Tracer.Attachment0 = OriginAttachment
+    Tracer.Attachment1 = PositionAttachment
+    Tracer.FaceCamera = false
+    Tracer.Segments = 1
+    Tracer.Width0 = 0.15
+    Tracer.Width1 = 0.15
+    return Tracer, part1, part2
 end
 
 local function get_closest_target(usefov, fov_size, aimpart, npc, friendly_list)
@@ -230,9 +259,51 @@ local function is_holding_weapon()
     return weapon ~= nil and weapon.Name ~= "Fists"
 end
 
+-- instant hit packet system
+local FireProjectile = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("FireProjectile")
+local ProjectileInflict = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ProjectileInflict")
+
+local function instant_hit_packet(target_part)
+    if not target_part then return false end
+    
+    local rnd = math.random(-100000, 100000)
+    local now = tick()
+    
+    -- fire projectile with NaN (instant travel)
+    local success = FireProjectile:InvokeServer(
+        Vector3.new(0/0, 0/0, 0/0), -- NaN position = instant hit
+        rnd,
+        now
+    )
+    
+    if success then
+        -- inflict damage on target
+        ProjectileInflict:FireServer(
+            target_part,
+            target_part.CFrame:ToObjectSpace(CFrame.new(0, 0.0001, 0)),
+            rnd,
+            0/0
+        )
+        return true
+    end
+    return false
+end
+
 -- bullet hook
 local GotHook = false
+local BulletModule = nil
+local CreateBulletFunc = nil
+
 task.spawn(function()
+    -- get bullet module reference like swimhub
+    local success, result = pcall(function()
+        return require(ReplicatedStorage.Modules.FPS.Bullet)
+    end)
+    if success and result then
+        BulletModule = result
+        CreateBulletFunc = result.CreateBullet
+    end
+    
     repeat
         for i, gc in next, getgc(true) do
             if type(gc) == "table" then
@@ -240,65 +311,75 @@ task.spawn(function()
                     local old_bullet = gc.CreateBullet
                     gc.CreateBullet = function(self, ...)
                         local args = { ... }
-                        if SilentAim.enabled and is_holding_weapon() then
-                            if math.random(1, 100) > SilentAim.hit_chance then
-                                return old_bullet(self, unpack(args))
-                            end
-                            
-                            local loadedammo, aimpart_index
-                            for i, v in args do
-                                if typeof(v) == "Instance" and v.Name == "AimPart" then
-                                    aimpart_index = i
-                                end
-                                if type(v) == "string" then
-                                    local tmp = FindFirstChild(ReplicatedStorage.AmmoTypes, v)
-                                    if tmp then loadedammo = tmp end
-                                end
-                            end
-                            
-                            if not (loadedammo and aimpart_index) then
-                                return old_bullet(self, unpack(args))
-                            end
-                            
-                            if SilentAim.visible_check and not SilentAim.is_visible then
-                                return old_bullet(self, unpack(args))
-                            end
-                            
-                            local now = tick()
-                            if now - SilentAim.last_shot_time < SilentAim.shot_delay then
-                                return old_bullet(self, unpack(args))
-                            end
-                            SilentAim.last_shot_time = now
-                            
-                            if SilentAim.tracer and SilentAim.target_part then
-                                local tracer, p1, p2 = make_tracer(args[aimpart_index].Position, SilentAim.target_part.Position, SilentAim.tracer_color)
-                                local fade = 0.5
-                                local conn
-                                conn = RunService.RenderStepped:Connect(function(delta)
-                                    fade = fade + delta
-                                    tracer.Transparency = NumberSequence.new(math.clamp(fade, 0.5, 1))
-                                    if fade >= 1 then
-                                        tracer:Destroy()
-                                        p1:Destroy()
-                                        p2:Destroy()
-                                        conn:Disconnect()
-                                    end
-                                end)
-                            end
-                            
-                            if not SilentAim.target_part then
-                                return old_bullet(self, unpack(args))
-                            end
-                            
-                            local origin = Camera.CFrame.Position
-                            local target_pos = SilentAim.target_part.Position
-                            local target_vel = SilentAim.target_part.Velocity
-                            local muzzle_vel = loadedammo:GetAttribute("MuzzleVelocity") or 300
-                            local predicted = predict_velocity(origin, target_pos, target_vel, muzzle_vel)
-                            
-                            args[aimpart_index] = { CFrame = CFrameNew(origin, predicted) }
+                        
+                        -- early exit if silent aim disabled or no target
+                        if not SilentAim.enabled then
+                            return old_bullet(self, unpack(args))
                         end
-                        return old_bullet(self, unpack(args))
+                        
+                        if not SilentAim.target_part then
+                            return old_bullet(self, unpack(args))
+                        end
+                        
+                        -- hit chance check
+                        if math.random(1, 100) > SilentAim.hit_chance then
+                            return old_bullet(self, unpack(args))
+                        end
+                        
+                        -- find ammo and aim part from args
+                        local loadedammo, aimpart_index
+                        for i, v in args do
+                            if typeof(v) == "Instance" and v.Name == "AimPart" then
+                                aimpart_index = i
+                            end
+                            if type(v) == "string" then
+                                local tmp = FindFirstChild(ReplicatedStorage.AmmoTypes, v)
+                                if tmp then loadedammo = tmp end
+                            end
+                        end
+                        
+                        if not (loadedammo and aimpart_index) then
+                            return old_bullet(self, unpack(args))
+                        end
+                        
+                        -- visibility check
+                        if SilentAim.visible_check and not SilentAim.is_visible then
+                            return old_bullet(self, unpack(args))
+                        end
+                        
+                        -- tracer
+                        if SilentAim.tracer then
+                            local tracer, p1, p2 = make_tracer(args[aimpart_index].Position, SilentAim.target_part.Position, SilentAim.tracer_color)
+                            local fade = 0.5
+                            local conn
+                            conn = RunService.RenderStepped:Connect(function(delta)
+                                fade = fade + delta
+                                tracer.Transparency = NumberSequence.new(math.clamp(fade, 0.5, 1))
+                                if fade >= 1 then
+                                    tracer:Destroy()
+                                    p1:Destroy()
+                                    p2:Destroy()
+                                    conn:Disconnect()
+                                end
+                            end)
+                        end
+                        
+                        -- prediction / instant hit
+                        if SilentAim.instant_hit then
+                            -- packet-based instant hit (true instant damage)
+                            instant_hit_packet(SilentAim.target_part)
+                            -- still create visual bullet but don't wait for it to hit
+                            args[aimpart_index] = { CFrame = CFrameNew(Camera.CFrame.Position, SilentAim.target_part.Position) }
+                            return old_bullet(self, unpack(args))
+                        else
+                            local Origin = Camera.CFrame.Position
+                            local Destination = SilentAim.target_part.Position
+                            local DestinationVelocity = SilentAim.target_part.Velocity
+                            local ProjectileSpeed = loadedammo:GetAttribute("MuzzleVelocity") or 300
+                            local PredictedPos = predict_velocity(Origin, Destination, DestinationVelocity, ProjectileSpeed)
+                            args[aimpart_index] = { CFrame = CFrameNew(Origin, PredictedPos) }
+                            return old_bullet(self, unpack(args))
+                        end
                     end
                     GotHook = true
                     break
@@ -348,6 +429,7 @@ SilentAimGroup:AddToggle('SilentAimVisibleCheck', {
     Text = 'visible only',
     Default = true,
     Tooltip = 'only targets visible targets',
+    Callback = function(Value)
         SilentAim.visible_check = Value
     end
 })
@@ -397,6 +479,15 @@ SilentAimGroup:AddSlider('SilentAimHitChance', {
     Suffix = '%',
     Callback = function(Value)
         SilentAim.hit_chance = Value
+    end
+})
+
+SilentAimGroup:AddToggle('SilentAimInstantHit', {
+    Text = 'instant hit',
+    Default = false,
+    Tooltip = 'bullets hit instantly (no travel time)',
+    Callback = function(Value)
+        SilentAim.instant_hit = Value
     end
 })
 
@@ -1364,9 +1455,17 @@ local MovementGroup = Tabs.Misc:AddLeftGroupbox('movement')
 local MovementMods = {
     speed_mult = 1.0,
     jump_mult = 1.0,
-    original_walkspeed = nil,
-    original_jumppower = nil
+    enabled = false,
+    last_jumped = false
 }
+
+MovementGroup:AddToggle('SpeedModEnabled', {
+    Text = 'speed modifier',
+    Default = false,
+    Callback = function(Value)
+        MovementMods.enabled = Value
+    end
+})
 
 MovementGroup:AddSlider('SpeedMultiplier', {
     Text = 'speed multiplier',
@@ -1394,43 +1493,56 @@ MovementGroup:AddSlider('JumpMultiplier', {
     end
 })
 
-local function setup_movement_hooks(humanoid)
-    -- track last applied values to detect external changes
-    local last_base_speed = humanoid.WalkSpeed
-    local last_base_jump = humanoid.JumpPower
-    
-    -- hook WalkSpeed changes from the game
-    humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-        local current = humanoid.WalkSpeed
-        -- if changed externally (not by our script), update base and reapply
-        local expected = last_base_speed * MovementMods.speed_mult
-        if math.abs(current - expected) > 0.01 then
-            last_base_speed = current / MovementMods.speed_mult
-            humanoid.WalkSpeed = last_base_speed * MovementMods.speed_mult
-        end
-    end)
-    
-    humanoid:GetPropertyChangedSignal("JumpPower"):Connect(function()
-        local current = humanoid.JumpPower
-        local expected = last_base_jump * MovementMods.jump_mult
-        if math.abs(current - expected) > 0.01 then
-            last_base_jump = current / MovementMods.jump_mult
-            humanoid.JumpPower = last_base_jump * MovementMods.jump_mult
-        end
-    end)
-    
-    -- apply initial multipliers
-    humanoid.WalkSpeed = humanoid.WalkSpeed * MovementMods.speed_mult
-    humanoid.JumpPower = humanoid.JumpPower * MovementMods.jump_mult
-end
+-- velocity-based speed modifier for Project Delta
+local UserInputService = game:GetService("UserInputService")
+local last_hrp_pos = nil
 
--- update loop - reapply multipliers continuously
-RunService.Heartbeat:Connect(function()
+RunService.Heartbeat:Connect(function(delta)
+    if not MovementMods.enabled then return end
+    
     local character = LocalPlayer.Character
+    local hrp = character and FindFirstChild(character, "HumanoidRootPart")
     local humanoid = character and FindFirstChildOfClass(character, "Humanoid")
-    if humanoid and not humanoid:GetAttribute("MovementHooked") then
-        humanoid:SetAttribute("MovementHooked", true)
-        setup_movement_hooks(humanoid)
+    if not (hrp and humanoid) then return end
+    
+    -- check if on ground
+    local is_on_ground = humanoid.FloorMaterial ~= Enum.Material.Air
+    
+    -- get input direction
+    local move_dir = Vector3.zero
+    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+        move_dir = move_dir + (Camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+        move_dir = move_dir - (Camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+        move_dir = move_dir + (Camera.CFrame.RightVector * Vector3.new(1, 0, 1)).Unit
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+        move_dir = move_dir - (Camera.CFrame.RightVector * Vector3.new(1, 0, 1)).Unit
+    end
+    
+    -- apply speed multiplier to velocity when moving
+    if move_dir ~= Vector3.zero and is_on_ground then
+        move_dir = move_dir.Unit
+        local target_vel = move_dir * 16 * MovementMods.speed_mult -- 16 is default walkspeed
+        hrp.AssemblyLinearVelocity = Vector3.new(target_vel.X, hrp.AssemblyLinearVelocity.Y, target_vel.Z)
+    end
+    
+    -- jump multiplier
+    if humanoid.Jump and MovementMods.jump_mult ~= 1.0 then
+        if is_on_ground and not MovementMods.last_jumped then
+            MovementMods.last_jumped = true
+            local jump_vel = humanoid.JumpPower * MovementMods.jump_mult
+            hrp.AssemblyLinearVelocity = Vector3.new(
+                hrp.AssemblyLinearVelocity.X,
+                jump_vel,
+                hrp.AssemblyLinearVelocity.Z
+            )
+        end
+    else
+        MovementMods.last_jumped = false
     end
 end)
 
