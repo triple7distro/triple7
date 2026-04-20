@@ -1358,6 +1358,82 @@ RunService.Heartbeat:Connect(function(delta)
     end
 end)
 
+-- movement modifiers
+local MovementGroup = Tabs.Misc:AddLeftGroupbox('movement')
+
+local MovementMods = {
+    speed_mult = 1.0,
+    jump_mult = 1.0,
+    original_walkspeed = nil,
+    original_jumppower = nil
+}
+
+MovementGroup:AddSlider('SpeedMultiplier', {
+    Text = 'speed multiplier',
+    Default = 1.0,
+    Min = 0.5,
+    Max = 2.0,
+    Rounding = 2,
+    Suffix = 'x',
+    Compact = true,
+    Callback = function(Value)
+        MovementMods.speed_mult = Value
+    end
+})
+
+MovementGroup:AddSlider('JumpMultiplier', {
+    Text = 'jump multiplier',
+    Default = 1.0,
+    Min = 0.5,
+    Max = 2.0,
+    Rounding = 2,
+    Suffix = 'x',
+    Compact = true,
+    Callback = function(Value)
+        MovementMods.jump_mult = Value
+    end
+})
+
+local function setup_movement_hooks(humanoid)
+    -- track last applied values to detect external changes
+    local last_base_speed = humanoid.WalkSpeed
+    local last_base_jump = humanoid.JumpPower
+    
+    -- hook WalkSpeed changes from the game
+    humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+        local current = humanoid.WalkSpeed
+        -- if changed externally (not by our script), update base and reapply
+        local expected = last_base_speed * MovementMods.speed_mult
+        if math.abs(current - expected) > 0.01 then
+            last_base_speed = current / MovementMods.speed_mult
+            humanoid.WalkSpeed = last_base_speed * MovementMods.speed_mult
+        end
+    end)
+    
+    humanoid:GetPropertyChangedSignal("JumpPower"):Connect(function()
+        local current = humanoid.JumpPower
+        local expected = last_base_jump * MovementMods.jump_mult
+        if math.abs(current - expected) > 0.01 then
+            last_base_jump = current / MovementMods.jump_mult
+            humanoid.JumpPower = last_base_jump * MovementMods.jump_mult
+        end
+    end)
+    
+    -- apply initial multipliers
+    humanoid.WalkSpeed = humanoid.WalkSpeed * MovementMods.speed_mult
+    humanoid.JumpPower = humanoid.JumpPower * MovementMods.jump_mult
+end
+
+-- update loop - reapply multipliers continuously
+RunService.Heartbeat:Connect(function()
+    local character = LocalPlayer.Character
+    local humanoid = character and FindFirstChildOfClass(character, "Humanoid")
+    if humanoid and not humanoid:GetAttribute("MovementHooked") then
+        humanoid:SetAttribute("MovementHooked", true)
+        setup_movement_hooks(humanoid)
+    end
+end)
+
 -- settings
 local MenuGroup = Tabs.Settings:AddLeftGroupbox('menu')
 
