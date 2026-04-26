@@ -1,0 +1,105 @@
+-- made on earth, by humans.
+-- health DRAWING
+
+wait(1)
+
+local e4_001 = game:GetService("Players").LocalPlayer
+local e4_002 = workspace.CurrentCamera
+local e4_003 = game:GetService("RunService")
+local e4_004 = game:GetService("Players")
+local e4_025 = game:GetService("UserInputService")
+
+local e4_005 = {}
+local e4_026 = true
+
+local function e4_006(plr)
+    local e4_009 = Drawing.new("Text")
+    e4_009.Visible = true
+    e4_009.Text = ""
+    e4_009.Size = 18
+    e4_009.Font = 2
+    e4_009.Outline = true
+    e4_009.Center = true
+    e4_009.Color = Color3.fromRGB(255, 255, 255)
+    e4_005[plr] = e4_009
+end
+
+local function e4_007(plr)
+    local e4_011 = e4_005[plr]
+    if e4_011 then
+        e4_011:Remove()
+        e4_005[plr] = nil
+    end
+end
+
+e4_025.InputBegan:Connect(function(e4_027, e4_028)
+    if e4_027.KeyCode == Enum.KeyCode.LeftAlt and not e4_028 then
+        e4_026 = not e4_026
+        if not e4_026 then
+            for _, e4_029 in pairs(e4_005) do
+                e4_029.Visible = false
+            end
+        end
+    end
+end)
+
+local e4_023 = 0
+
+e4_003.Heartbeat:Connect(function(e4_024)
+    e4_023 = e4_023 + e4_024
+    if e4_023 < 1/60 then return end
+    e4_023 = e4_023 - 1/60
+
+    if not e4_026 then
+        for _, e4_029 in pairs(e4_005) do
+            e4_029.Visible = false
+        end
+        return
+    end
+
+    local e4_019 = e4_001.Character
+    if not e4_019 or not e4_019:FindFirstChild("Head") then
+        for _, e4_013 in pairs(e4_005) do
+            e4_013.Visible = false
+        end
+        return
+    end
+    local e4_020 = e4_019.Head.Position
+
+    for e4_012, e4_013 in pairs(e4_005) do
+        local e4_014 = e4_012.Character
+        if e4_014 and e4_014:FindFirstChild("Humanoid") and e4_014:FindFirstChild("Head") then
+            local e4_015 = e4_014.Humanoid
+            local e4_016 = e4_014.Head
+
+            if (e4_016.Position - e4_020).Magnitude <= 500 then
+                local e4_017, e4_018 = e4_002:WorldToViewportPoint(e4_016.Position)
+
+                if e4_018 and e4_015.Health > 0 then
+                    e4_013.Text = tostring(math.floor(e4_015.Health))
+                    e4_013.Position = Vector2.new(e4_017.X, e4_017.Y - 20)
+                    e4_013.Visible = true
+                else
+                    e4_013.Visible = false
+                end
+            else
+                e4_013.Visible = false
+            end
+        else
+            e4_013.Visible = false
+        end
+    end
+end)
+
+for _, e4_021 in ipairs(e4_004:GetPlayers()) do
+    if e4_021 ~= e4_001 then
+        e4_006(e4_021)
+    end
+end
+
+e4_004.PlayerAdded:Connect(function(e4_022)
+    if e4_022 ~= e4_001 then
+        e4_006(e4_022)
+    end
+end)
+e4_004.PlayerRemoving:Connect(e4_007)
