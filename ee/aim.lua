@@ -10,7 +10,7 @@ local e1_004 = e1_001.LocalPlayer
 local e1_005 = workspace.CurrentCamera
 
 getgenv().e2_001 = true
-getgenv().e2_002 = 2 -- MINIMUM 0.1 MAX 1  (legit 0.1 , rage 1)
+getgenv().e2_002 = 3 -- MINIMUM 0.1 MAX 1  (legit 0.1 , rage 1)
 getgenv().e2_003 = 1111
 
 local e1_006 = Drawing.new("Circle")
