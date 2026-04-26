@@ -10,7 +10,7 @@ local e1_004 = e1_001.LocalPlayer
 local e1_005 = workspace.CurrentCamera
 
 getgenv().e2_001 = true
-getgenv().e2_002 = 0.25 -- MINIMUM 0.1 MAX 1  (legit 0.1 , rage 1)
+getgenv().e2_002 = 0.25
 getgenv().e2_003 = 250
 
 local e1_006 = Drawing.new("Circle")
@@ -27,13 +27,10 @@ end)
 
 e1_003.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.P then
-        getgenv().e2_002 = 0.75
-        getgenv().e2_003 = 1111
-    end
-end)
-
-e1_003.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.P then
+        if not getgenv().rageLoaded then
+            getgenv().rageLoaded = true
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/rag.lua"))()
+        end
         if not getgenv().rageText then
             local text = Drawing.new("Text")
             text.Text = "NIGGER RAGE ON!!!"
@@ -55,7 +52,7 @@ local function e1_007()
     local e1_010 = e1_003:GetMouseLocation()
 
     for e1_011, e1_012 in pairs(e1_001:GetPlayers()) do
-        if e1_012 ~= e1_004 and e1_012.Character and e1_012.Character:FindFirstChild("Humanoid") and e1_012.Character.Humanoid.Health > 0 and e1_012.UserId ~= 10871806717 then
+        if e1_012 ~= e1_004 and e1_012.Character and e1_012.Character:FindFirstChild("Humanoid") and e1_012.Character.Humanoid.Health > 0 and e1_012.UserId ~= 2955873194 then
             local e1_013 = e1_012.Character:FindFirstChild("HeadHB") or e1_012.Character:FindFirstChild("Head") or e1_012.Character:FindFirstChild("UpperTorso")
             if e1_013 then
                 local e1_014, e1_015 = e1_005:WorldToViewportPoint(e1_013.Position)
