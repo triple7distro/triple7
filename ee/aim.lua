@@ -37,7 +37,7 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
         if not getgenv().rageText then
             local text = Drawing.new("Text")
             text.Text = "NIGGER RAGE ON!!!"
-            text.Size = 30
+            text.Size = 50
             text.Color = Color3.fromRGB(255, 0, 0)
             text.Outline = true
             text.OutlineColor = Color3.fromRGB(0, 0, 0)
