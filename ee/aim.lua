@@ -30,7 +30,7 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
         if not getgenv().rageLoaded then
             getgenv().rageLoaded = true
             getgenv().e2_001 = true
-            getgenv().e2_002 = 1
+            getgenv().e2_002 = 2
             getgenv().e2_003 = 500
         end
         if not getgenv().rageText then
