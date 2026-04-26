@@ -17,7 +17,7 @@ local e1_006 = Drawing.new("Circle")
 e1_006.Thickness = 1
 e1_006.Visible = true
 e1_006.Color = Color3.fromRGB(111, 111, 111)
-e1_006.Transparency = 0.5
+e1_006.Transparency = 0
 
 e1_003.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.LeftAlt then
