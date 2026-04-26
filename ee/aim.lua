@@ -28,6 +28,7 @@ end)
 e1_003.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.P then
         getgenv().e2_002 = 1
+        getgenv().e2_003 = 1111
     end
 end)
 
