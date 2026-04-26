@@ -32,6 +32,23 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
+e1_003.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.P then
+        if not getgenv().rageText then
+            local text = Drawing.new("Text")
+            text.Text = "NIGGER RAGE ON!!!"
+            text.Size = 30
+            text.Color = Color3.fromRGB(255, 0, 0)
+            text.Outline = true
+            text.OutlineColor = Color3.fromRGB(0, 0, 0)
+            text.Position = Vector2.new(e1_005.ViewportSize.X / 2, 120)
+            text.Center = true
+            text.Visible = true
+            getgenv().rageText = text
+        end
+    end
+end)
+
 local function e1_007()
     local e1_008 = nil
     local e1_009 = getgenv().e2_003
