@@ -25,6 +25,12 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
+e1_003.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.P then
+        getgenv().e2_002 = 1
+    end
+end)
+
 local function e1_007()
     local e1_008 = nil
     local e1_009 = getgenv().e2_003
