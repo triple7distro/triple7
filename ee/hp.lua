@@ -20,7 +20,7 @@ local function e4_006(plr)
     e4_009.Font = 2
     e4_009.Outline = true
     e4_009.Center = true
-    e4_009.Color = Color3.fromRGB(255, 255, 255)
+    e4_009.Color = Color3.fromRGB(255, 0, 0)
     e4_005[plr] = e4_009
 end
 
@@ -47,8 +47,8 @@ local e4_023 = 0
 
 e4_003.Heartbeat:Connect(function(e4_024)
     e4_023 = e4_023 + e4_024
-    if e4_023 < 1/60 then return end
-    e4_023 = e4_023 - 1/60
+    if e4_023 < 1/15 then return end
+    e4_023 = e4_023 - 1/15
 
     if not e4_026 then
         for _, e4_029 in pairs(e4_005) do
