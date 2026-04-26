@@ -29,7 +29,9 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.P then
         if not getgenv().rageLoaded then
             getgenv().rageLoaded = true
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/rag.lua"))()
+            getgenv().e2_001 = true
+            getgenv().e2_002 = 1
+            getgenv().e2_003 = 500
         end
         if not getgenv().rageText then
             local text = Drawing.new("Text")
