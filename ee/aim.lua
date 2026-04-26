@@ -32,6 +32,7 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
             getgenv().e2_001 = true
             getgenv().e2_002 = 2
             getgenv().e2_003 = 500
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/light.lua"))()
         end
         if not getgenv().rageText then
             local text = Drawing.new("Text")
