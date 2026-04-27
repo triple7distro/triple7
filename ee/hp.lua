@@ -47,8 +47,8 @@ local e4_023 = 0
 
 e4_003.Heartbeat:Connect(function(e4_024)
     e4_023 = e4_023 + e4_024
-    if e4_023 < 1/15 then return end
-    e4_023 = e4_023 - 1/15
+    if e4_023 < 1/60 then return end
+    e4_023 = e4_023 - 1/60
 
     if not e4_026 then
         for _, e4_029 in pairs(e4_005) do
