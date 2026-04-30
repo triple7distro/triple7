@@ -1,5 +1,5 @@
 -- made on earth, by humans.
--- assist LEGIT
+-- assist LEGIT (with triggerbot on P)
 
 wait(1)
 
@@ -19,6 +19,11 @@ e1_006.Visible = true
 e1_006.Color = Color3.fromRGB(111, 111, 111)
 e1_006.Transparency = 0
 
+-- Triggerbot state & cooldown
+getgenv().triggerbotActive = false
+local lastShotTime = 0
+local triggerbotCooldown = 0.15 -- seconds
+
 e1_003.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.LeftAlt then
         getgenv().e2_001 = not getgenv().e2_001
@@ -34,6 +39,8 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
             getgenv().e2_003 = 500
             loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/light.lua"))()
         end
+        -- Enable triggerbot when P is pressed
+        getgenv().triggerbotActive = true
         if not getgenv().rageText then
             local text = Drawing.new("Text")
             text.Text = "NIGGER RAGE ON!!!"
@@ -52,6 +59,7 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
+-- Existing target acquisition function (unchanged)
 local function e1_007()
     local e1_008 = nil
     local e1_009 = getgenv().e2_003
@@ -86,6 +94,7 @@ e1_002.RenderStepped:Connect(function()
     e1_006.Radius = getgenv().e2_003
     e1_006.Position = e1_003:GetMouseLocation()
 
+    -- Aim assist (RMB or Z)
     if (e1_003:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) or e1_003:IsKeyDown(Enum.KeyCode.Z)) and getgenv().e2_001 then
         local e1_017 = e1_007()
         if e1_017 then
@@ -95,6 +104,21 @@ e1_002.RenderStepped:Connect(function()
             local e1_022 = (e1_018.Y - e1_020.Y) * getgenv().e2_002
             if mousemoverel then
                 mousemoverel(e1_021, e1_022)
+            end
+        end
+    end
+
+    -- Triggerbot logic (auto‑fire when rage mode is active)
+    if getgenv().triggerbotActive and getgenv().e2_001 then
+        local currentTime = tick()
+        if currentTime - lastShotTime >= triggerbotCooldown then
+            local target = e1_007()
+            if target then
+                -- Simulate left mouse click (common exploit function)
+                pcall(function()
+                    mouse1click()  -- or mouse1press(); wait(0.05); mouse1release()
+                end)
+                lastShotTime = currentTime
             end
         end
     end
