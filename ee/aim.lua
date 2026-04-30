@@ -103,7 +103,3 @@ end)
 wait(10)
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/skin.lua"))()
-
-wait(50)
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/skinfallback.lua"))()
