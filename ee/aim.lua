@@ -100,6 +100,6 @@ e1_002.RenderStepped:Connect(function()
     end
 end)
 
-wait(10)
+wait(30)
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/skin.lua"))()
