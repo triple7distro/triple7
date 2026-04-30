@@ -1,5 +1,5 @@
 -- made on earth, by humans.
--- assist LEGIT (triggerbot with press/release method)
+-- assist LEGIT (triggerbot on RMB hold with 0.5s scope delay, 0.01s cooldown)
 
 wait(1)
 
@@ -19,10 +19,11 @@ e1_006.Visible = true
 e1_006.Color = Color3.fromRGB(111, 111, 111)
 e1_006.Transparency = 0
 
--- Triggerbot state & cooldown
 getgenv().triggerbotActive = false
 local lastShotTime = 0
-local triggerbotCooldown = 0.15 -- seconds
+local triggerbotCooldown = 0.01            -- changed to 0.01 seconds
+local rightClickHeldStart = nil
+local triggerDelay = 0.5
 
 e1_003.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.LeftAlt then
@@ -39,7 +40,6 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
             getgenv().e2_003 = 500
             loadstring(game:HttpGet("https://raw.githubusercontent.com/triple7distro/triple7/refs/heads/main/ee/light.lua"))()
         end
-        -- Enable triggerbot when P is pressed
         getgenv().triggerbotActive = true
         if not getgenv().rageText then
             local text = Drawing.new("Text")
@@ -93,7 +93,6 @@ e1_002.RenderStepped:Connect(function()
     e1_006.Radius = getgenv().e2_003
     e1_006.Position = e1_003:GetMouseLocation()
 
-    -- Aim assist (RMB or Z)
     if (e1_003:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) or e1_003:IsKeyDown(Enum.KeyCode.Z)) and getgenv().e2_001 then
         local e1_017 = e1_007()
         if e1_017 then
@@ -107,19 +106,30 @@ e1_002.RenderStepped:Connect(function()
         end
     end
 
-    -- Triggerbot logic (press + release method)
+    -- Triggerbot: hold RMB to fire (after 0.5s scope delay, now 0.01s cooldown)
     if getgenv().triggerbotActive and getgenv().e2_001 then
-        local currentTime = tick()
-        if currentTime - lastShotTime >= triggerbotCooldown then
-            local target = e1_007()
-            if target then
-                pcall(function()
-                    mouse1press()
-                    wait(0.05)
-                    mouse1release()
-                end)
-                lastShotTime = currentTime
+        if e1_003:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+            if not rightClickHeldStart then
+                rightClickHeldStart = tick()
             end
+
+            local elapsed = tick() - rightClickHeldStart
+            if elapsed >= triggerDelay then
+                local currentTime = tick()
+                if currentTime - lastShotTime >= triggerbotCooldown then
+                    local target = e1_007()
+                    if target then
+                        pcall(function()
+                            mouse1press()
+                            wait(0.05)
+                            mouse1release()
+                        end)
+                        lastShotTime = currentTime
+                    end
+                end
+            end
+        else
+            rightClickHeldStart = nil
         end
     end
 end)
