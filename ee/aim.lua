@@ -1,5 +1,5 @@
 -- made on earth, by humans.
--- assist LEGIT (with triggerbot on P)
+-- assist LEGIT (triggerbot with press/release method)
 
 wait(1)
 
@@ -59,7 +59,6 @@ e1_003.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Existing target acquisition function (unchanged)
 local function e1_007()
     local e1_008 = nil
     local e1_009 = getgenv().e2_003
@@ -108,15 +107,16 @@ e1_002.RenderStepped:Connect(function()
         end
     end
 
-    -- Triggerbot logic (auto‑fire when rage mode is active)
+    -- Triggerbot logic (press + release method)
     if getgenv().triggerbotActive and getgenv().e2_001 then
         local currentTime = tick()
         if currentTime - lastShotTime >= triggerbotCooldown then
             local target = e1_007()
             if target then
-                -- Simulate left mouse click (common exploit function)
                 pcall(function()
-                    mouse1click()  -- or mouse1press(); wait(0.05); mouse1release()
+                    mouse1press()
+                    wait(0.05)
+                    mouse1release()
                 end)
                 lastShotTime = currentTime
             end
