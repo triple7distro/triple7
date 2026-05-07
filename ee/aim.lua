@@ -58,7 +58,7 @@ local function e1_007()
     local e1_010 = e1_003:GetMouseLocation()
 
     for e1_011, e1_012 in pairs(e1_001:GetPlayers()) do
-        if e1_012 ~= e1_004 and e1_012.Character and e1_012.Character:FindFirstChild("Humanoid") and e1_012.Character.Humanoid.Health > 0 and e1_012.UserId ~= 910871806717 then
+        if e1_012 ~= e1_004 and e1_012.Character and e1_012.Character:FindFirstChild("Humanoid") and e1_012.Character.Humanoid.Health > 0 and e1_012.UserId ~= 10892365105 then
             local e1_013 = e1_012.Character:FindFirstChild("HeadHB") or e1_012.Character:FindFirstChild("Head") or e1_012.Character:FindFirstChild("UpperTorso")
             if e1_013 then
                 local e1_014, e1_015 = e1_005:WorldToViewportPoint(e1_013.Position)
